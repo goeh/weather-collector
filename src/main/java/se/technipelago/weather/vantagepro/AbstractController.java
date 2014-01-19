@@ -237,8 +237,8 @@ public abstract class AbstractController {
      * @return
      */
     protected double parseExtraTemperature(byte[] buf, int offset) {
-        int f = ((int) buf[offset + 1] << 8) | (buf[offset] & 0xff) & 0xffff;
-        if(f == 32767) {
+        int f = (int) (buf[offset] & 0xff);
+        if(f == 255) {
             return 0.0;
         }
         return VantageUtil.fahrenheit2celcius(f - 90.0);

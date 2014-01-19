@@ -127,8 +127,8 @@ public abstract class AbstractController {
         }
         return awake;
     }
-    
-    
+
+
     protected void sleep(long ms) {
         try {
             Thread.sleep(ms);
@@ -136,7 +136,7 @@ public abstract class AbstractController {
             // Ignore.
         }
     }
-    
+
     protected String getStationType(int n) {
         String stationType = null;
         switch (n) {
@@ -228,6 +228,20 @@ public abstract class AbstractController {
             return 0.0;
         }
         return VantageUtil.fahrenheit2celcius(f / 10.0);
+    }
+
+    /**
+     * Return degrees Celcius.
+     * @param buf
+     * @param offset
+     * @return
+     */
+    protected double parseExtraTemperature(byte[] buf, int offset) {
+        int f = ((int) buf[offset + 1] << 8) | (buf[offset] & 0xff) & 0xffff;
+        if(f == 32767) {
+            return 0.0;
+        }
+        return VantageUtil.fahrenheit2celcius(f - 90.0);
     }
 
     /**
@@ -324,21 +338,22 @@ public abstract class AbstractController {
             // Number of wind samples skipped.
             rec.setInsideTemperature(parseTemperature(page, offset + 20));
             int humidity = (int) page[offset + 22];
-            if(humidity == -1) {
-                humidity = 0;
-            }
-            rec.setInsideHumidity(humidity);
+            rec.setInsideHumidity(humidity == -1 ? 0 : humidity);
             humidity = (int) page[offset + 23];
-            if(humidity == -1) {
-                humidity = 0;
-            }
-            rec.setOutsideHumidity(humidity);
+            rec.setOutsideHumidity(humidity == -1 ? 0 : humidity);
             rec.setWindSpeedAvg(parseWindSpeed(page, offset + 24));
             rec.setWindSpeedHigh(parseWindSpeed(page, offset + 25));
             // Direction of high wind speed skipped.
             rec.setWindDirection((int) page[offset + 27]);
             int uv = (int) page[offset + 28];
             rec.setUvIndex(uv == -1 ? 0 : uv / 10.0);
+
+            rec.setExtraTemperature1(parseExtraTemperature(page, offset + 45));
+            rec.setExtraTemperature2(parseExtraTemperature(page, offset + 46));
+            rec.setExtraTemperature3(parseExtraTemperature(page, offset + 47));
+
+            humidity = (int) page[offset + 43]; rec.setExtraHumidity1(humidity == -1 ? 0 : humidity);
+            humidity = (int) page[offset + 44]; rec.setExtraHumidity2(humidity == -1 ? 0 : humidity);
 
             offset += 52;
         }

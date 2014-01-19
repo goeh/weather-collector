@@ -43,11 +43,16 @@ public class ArchiveRecord {
     private double outsideTemperatureHigh;
     private double outsideTemperatureLow;
     private double insideTemperature;
+    private double extraTemperature1;
+    private double extraTemperature2;
+    private double extraTemperature3;
     private double rainFall;
     private double rainRateHigh;
     private int barometer;
     private int outsideHumidity;
     private int insideHumidity;
+    private int extraHumidity1;
+    private int extraHumidity2;
     private int solarRadiation;
     private double uvIndex;
     private double windSpeedAvg;
@@ -106,17 +111,33 @@ public class ArchiveRecord {
         return insideHumidity;
     }
 
-    public void setInsideHumidity(int insideHumidity) {
-        this.insideHumidity = insideHumidity;
-    }
+    public void setInsideHumidity(int insideHumidity) { this.insideHumidity = insideHumidity; }
 
-    public double getInsideTemperature() {
-        return insideTemperature;
-    }
+    public int getExtraHumidity1() { return extraHumidity1; }
+
+    public void setExtraHumidity1(int extraHumidity1) { this.extraHumidity1 = extraHumidity1; }
+
+    public int getExtraHumidity2() { return extraHumidity2; }
+
+    public void setExtraHumidity2(int extraHumidity2) { this.extraHumidity2 = extraHumidity2; }
+
+    public double getInsideTemperature() { return insideTemperature; }
 
     public void setInsideTemperature(double insideTemperature) {
         this.insideTemperature = insideTemperature;
     }
+
+    public double getExtraTemperature1() { return extraTemperature1; }
+
+    public void setExtraTemperature1(double extraTemperature1) { this.extraTemperature1 = extraTemperature1; }
+
+    public double getExtraTemperature2() { return extraTemperature2; }
+
+    public void setExtraTemperature2(double extraTemperature2) { this.extraTemperature2 = extraTemperature2; }
+
+    public double getExtraTemperature3() { return extraTemperature3; }
+
+    public void setExtraTemperature3(double extraTemperature3) { this.extraTemperature3 = extraTemperature3; }
 
     public double getRainFall() {
         return rainFall;

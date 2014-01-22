@@ -16,23 +16,39 @@
  */
 package se.technipelago.weather.vantagepro;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.archive.ArchivePage;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.DataStore;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Properties;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author Goran Ehrsson <goran@technipelago.se>
  */
 public class DownloadController extends AbstractController {
 
     private static final Logger log = Logger.getLogger(DownloadController.class.getName());
+    private static final String PROPERTIES_FILE = "remote.properties";
     private final DataStore store = new DataStore();
 
     public static void main(String[] args) {
@@ -55,6 +71,30 @@ public class DownloadController extends AbstractController {
         }
     }
 
+    private Properties getProperties() {
+        final Properties prop = new Properties();
+        InputStream fis = null;
+        try {
+            File file = new File(PROPERTIES_FILE);
+            if (file.exists()) {
+                fis = new FileInputStream(file);
+                prop.load(fis);
+            } else {
+                log.log(Level.WARNING, PROPERTIES_FILE + " not found, data will not be pushed to remote service.");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
+        return prop;
+    }
+
     public void init() {
         store.init();
     }
@@ -65,7 +105,7 @@ public class DownloadController extends AbstractController {
         } catch (IOException ex) {
             log.log(Level.SEVERE, "Cannot stop the receiver thread", ex);
         }
-       store.cleanup();
+        store.cleanup();
     }
 
     public void execute() throws IOException {
@@ -175,7 +215,13 @@ public class DownloadController extends AbstractController {
     }
 
     private void saveRecord(ArchiveRecord rec) throws SQLException {
-        if (!store.insertData(rec)) {
+        if (store.insertData(rec)) {
+            try {
+                postToExternal(rec);
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "Failed to post to external service", e);
+            }
+        } else {
             log.fine("Record already saved: " + rec);
         }
     }
@@ -194,6 +240,67 @@ public class DownloadController extends AbstractController {
             store.updateCurrent(current);
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "Failed to update current values", ex);
+        }
+    }
+
+    private void postToExternal(ArchiveRecord rec) throws IOException {
+        final Properties prop = getProperties();
+        String url = prop.getProperty("remote.url");
+        if(url == null || url.trim().length() == 0) {
+            return;
+        }
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String timestamp = dateFormat.format(rec.getTimestamp());
+        StringBuilder buf = new StringBuilder();
+        String clientKey = prop.getProperty("remote.client.key");
+        String clientSecret = prop.getProperty("remote.client.secret");
+        buf.append("{\n");
+        buf.append("  \"clientKey\": \"" + clientKey + "\",\n");
+        buf.append("  \"clientSecret\": \"" + clientSecret + "\",\n");
+        buf.append("  \"data\": [\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"outsideTemperature\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getOutsideTemperature() + "\n");
+        buf.append("    },\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"outsideHumidity\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getOutsideHumidity() + "\n");
+        buf.append("    },\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"cellarTemperature\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getExtraTemperature1() + "\n");
+        buf.append("    },\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"cellarHumidity\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getExtraHumidity1() + "\n");
+        buf.append("    }\n");
+
+        buf.append("  ]\n");
+        buf.append("}\n");
+
+
+        httpPost.setEntity(new StringEntity(buf.toString(), ContentType.create("application/json")));
+
+        CloseableHttpResponse response = httpclient.execute(httpPost);
+
+        try {
+            HttpEntity entity = response.getEntity();
+            // do something useful with the response body
+            // and ensure it is fully consumed
+            EntityUtils.consume(entity);
+        } finally {
+            response.close();
         }
     }
 }

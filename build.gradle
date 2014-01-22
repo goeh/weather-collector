@@ -1,22 +1,22 @@
 apply plugin: 'java'
-apply plugin:'application'
+apply plugin: 'application'
+
+sourceCompatibility = 1.5
+version = '1.2'
+mainClassName = "se.technipelago.weather.vantagepro.DownloadController"
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Davis Weather Station Downloader', 'Implementation-Version': version
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-   runtime 'mysql:mysql-connector-java:5.1.11'
-   runtime 'org.hsqldb:hsqldb:1.8.0.10'
-}
-
-defaultTasks 'clean', 'distZip'
-
-sourceCompatibility = 1.5
-version = '1.1'
-mainClassName = 'se.technipelago.weather.vantagepro.DownloadController'
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'Weather Data Collector', 'Implementation-Version': version, 'Main-Class' : mainClassName
-    }
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.1'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.28'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
 }

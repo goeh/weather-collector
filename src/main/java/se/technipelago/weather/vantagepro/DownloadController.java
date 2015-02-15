@@ -119,6 +119,8 @@ public class DownloadController extends AbstractController {
             return;
         }
 
+        log.fine("Connected to weather station");
+
         // Get current station time.
         writeString("GETTIME\n");
         if (in.read() != Constants.ACK) {
@@ -247,6 +249,7 @@ public class DownloadController extends AbstractController {
         final Properties prop = getProperties();
         String url = prop.getProperty("remote.url");
         if(url == null || url.trim().length() == 0) {
+            log.fine("No REST service configured");
             return;
         }
         CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -302,5 +305,7 @@ public class DownloadController extends AbstractController {
         } finally {
             response.close();
         }
+
+        log.fine("Weather data for " + timestamp + " sent to " + url);
     }
 }

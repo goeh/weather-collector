@@ -16,9 +16,12 @@
  */
 package se.technipelago.weather.vantagepro;
 
-import se.technipelago.weather.archive.CurrentRecord;
+import jssc.SerialPort;
+import jssc.SerialPortException;
 import se.technipelago.weather.archive.ArchivePage;
 import se.technipelago.weather.archive.ArchiveRecord;
+import se.technipelago.weather.archive.CurrentRecord;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,12 +30,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  *
  * @author goran
  */
 public abstract class AbstractController {
+
+    protected final Logger log = Logger.getLogger(getClass().getName());
 
     protected static final String IN = "< ";
     protected static final String OUT = "> ";
@@ -70,6 +76,41 @@ public abstract class AbstractController {
             if (connection != null) {
                 try {
                     connection.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    protected void startLocal(String[] args) throws IOException {
+        String portName = args.length > 0 ? args[0] : "/dev/cu.SLAB_USBtoUART"; //"/dev/ttyUSB0";
+        int baud = args.length > 1 ? Integer.parseInt(args[1]) : 19200;
+        SerialPort serialPort = new SerialPort(portName);
+        RingBuffer buffer = new RingBuffer();
+
+        try {
+            serialPort.openPort();
+            serialPort.setParams(baud, 8, 1, 0);
+            serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
+            serialPort.addEventListener(new SerialPortReader(serialPort, buffer));
+            in = new SerialPortInputStream(buffer);
+            out = new SerialPortOutputStream(serialPort);
+            run();
+            //serialPort.closePort();
+        } catch (SerialPortException ex) {
+            System.out.println(ex);
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -497,10 +538,10 @@ public abstract class AbstractController {
     }
 
     protected void log(String prefix, String string) {
-    //System.out.println(prefix + escape(string));
+        log.fine(prefix + escape(string));
     }
 
     protected void log(String prefix, byte[] bytes, int offset, int length) {
-    //System.out.println(prefix + escape(bytes, offset, length, false));
+        log.fine(prefix + escape(bytes, offset, length, false));
     }
 }

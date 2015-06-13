@@ -17,7 +17,7 @@
 package se.technipelago.weather.dataimport;
 
 import se.technipelago.weather.archive.ArchiveRecord;
-import se.technipelago.weather.archive.DataStore;
+import se.technipelago.weather.archive.SqlDataStore;
 import se.technipelago.weather.vantagepro.VantageUtil;
 import java.io.DataInputStream;
 import java.io.File;
@@ -42,7 +42,7 @@ public class WeatherLinkImporter {
 
     private static final Pattern FILE_PATTERN = Pattern.compile("([12][09][\\d][\\d]\\-[01][\\d])\\.[wW][lL][kK]$");
     private static final DateFormat FILE_DATE = new SimpleDateFormat("yyyy-MM");
-    private DataStore store = new DataStore();
+    private SqlDataStore store = new SqlDataStore();
 
     public static void main(String[] args) {
         if (args.length == 0) {
@@ -159,13 +159,13 @@ public class WeatherLinkImporter {
      *   uv float
      * );
      * </pre>
-     * 
+     *
      * @param date
      * @param sum1
      * @param sum2
      * @param rec
      */
-    private void store(Date date, DailySummary1 sum1, DailySummary2 sum2, WeatherDataRecord rec) throws SQLException {
+    private void store(Date date, DailySummary1 sum1, DailySummary2 sum2, WeatherDataRecord rec) throws IOException {
         Date ts = new Date(date.getTime() + rec.packedTime * 60 * 1000);
         double temp_out = (int) (VantageUtil.fahrenheit2celcius(rec.outTemp / 10.0) * 10) / 10.0;
         double temp_in = (int) (VantageUtil.fahrenheit2celcius(rec.inTemp / 10.0) * 10) / 10.0;

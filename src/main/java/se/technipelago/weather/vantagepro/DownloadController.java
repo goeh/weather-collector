@@ -24,44 +24,46 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.archive.ArchivePage;
 import se.technipelago.weather.archive.ArchiveRecord;
+import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.archive.DataStore;
+import se.technipelago.weather.archive.RemoteDataStore;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Goran Ehrsson <goran@technipelago.se>
  */
 public class DownloadController extends AbstractController {
 
-    private static final Logger log = Logger.getLogger(DownloadController.class.getName());
     private static final String PROPERTIES_FILE = "remote.properties";
-    private final DataStore store = new DataStore();
+    private final DataStore store = new RemoteDataStore("moja.");
+    //private final DataStore store = new SqlDataStore();
 
     public static void main(String[] args) {
         try {
-            new DownloadController().start(args);
+            new DownloadController().startLocal(args);
         } catch (IOException ex) {
-            log.log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
     }
 
     protected void run() {
         init();
         try {
+            //configure();
+            //test();
+            //clear();
             execute();
             sleep(3000);
         } catch (IOException ex) {
@@ -152,10 +154,19 @@ public class DownloadController extends AbstractController {
     public void test() throws IOException {
         byte[] buf;
 
+        // Send wakeup command.
+        if (wakeup()) {
+            log("\t", "The station is awake.");
+        } else {
+            log.warning("No response from station");
+            return;
+        }
+
+        log.fine("Connected to weather station");
+
         // Test command.
         writeString("TEST\n");
         expectString("\n\rTEST\n\r");
-
 
         // Determine station type.
         out.write(new byte[]{'W', 'R', 'D', 0x12, 0x4d, '\n'});
@@ -175,6 +186,57 @@ public class DownloadController extends AbstractController {
         expectString("\n\rOK\n\r");
         byte[] line = VantageUtil.readLine(in);
         log(IN, new String(line));
+
+        // Get current station time.
+        writeString("GETTIME\n");
+        if (in.read() != Constants.ACK) {
+            throw new IOException("Invalid response");
+        }
+        log(IN, "<ACK>");
+        buf = readBytes(8);
+        if (!CRC16.check(buf, 0, 8)) {
+            throw new IOException("CRC error");
+        }
+
+        // Get station time.
+        Date serverTime = new Date();
+        Date consoleTime = VantageUtil.getTime(buf, 0);
+        log("\t", "Console Time: " + consoleTime);
+    }
+
+    public void configure() throws IOException {
+        // Send wakeup command.
+        if (wakeup()) {
+            log("\t", "The station is awake.");
+        } else {
+            log.warning("No response from station");
+            return;
+        }
+
+        log.fine("Connected to weather station");
+        setConsoleTime(new Date());
+        writeString("SETPER 10\n");
+        expectString("\n\rOK\n\r");
+        sleep(1200);
+    }
+
+    private void clear() throws IOException {
+        // Send wakeup command.
+        if (wakeup()) {
+            log("\t", "The station is awake.");
+        } else {
+            log.warning("No response from station");
+            return;
+        }
+
+        log.fine("Connected to weather station");
+        writeString("CLRLOG\n");
+        sleep(3000);
+        if (in.read() != Constants.ACK) {
+            throw new IOException("Invalid response");
+        }
+        log(IN, "<ACK>");
+        log.fine("Archive data cleared");
     }
 
     private void downloadAndSave() throws IOException {
@@ -203,20 +265,28 @@ public class DownloadController extends AbstractController {
         for (int i = 0; i < 5; i++) {
             ArchiveRecord rec = p.getRecord(i);
             try {
-                saveRecord(rec);
-                Date d = rec.getTimestamp();
-                long l = d.getTime();
-                if (l > highTime) {
-                    highTime = l;
+                if(validate(rec)) {
+                    saveRecord(rec);
+                    Date d = rec.getTimestamp();
+                    long l = d.getTime();
+                    if (l > highTime) {
+                        highTime = l;
+                    }
+                } else {
+                    log.warning("Invalid record: " + rec);
                 }
-            } catch (SQLException e) {
+            } catch (IOException e) {
                 log.log(Level.WARNING, "Failed to save record: " + rec, e);
             }
         }
         return new Date(highTime);
     }
 
-    private void saveRecord(ArchiveRecord rec) throws SQLException {
+    private boolean validate(ArchiveRecord rec) {
+        return new Date().after(rec.getTimestamp());
+    }
+
+    private void saveRecord(ArchiveRecord rec) throws IOException {
         if (store.insertData(rec)) {
             try {
                 postToExternal(rec);
@@ -231,18 +301,14 @@ public class DownloadController extends AbstractController {
     private void saveStatus(Date lastRecord) {
         try {
             store.updateStatus(new Date(), lastRecord);
-        } catch (SQLException ex) {
+        } catch (IOException ex) {
             log.log(Level.SEVERE, "Failed to update archive status", ex);
         }
     }
 
     private void saveCurrentValues() throws IOException {
         final CurrentRecord current = loop();
-        try {
-            store.updateCurrent(current);
-        } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Failed to update current values", ex);
-        }
+        store.updateCurrent(current);
     }
 
     private void postToExternal(ArchiveRecord rec) throws IOException {

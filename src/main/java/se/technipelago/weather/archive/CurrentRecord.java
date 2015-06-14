@@ -17,6 +17,8 @@
 package se.technipelago.weather.archive;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is a POJO that hold current (live) values from the weather station.
@@ -58,6 +60,17 @@ public class CurrentRecord {
     private Date timestamp;
     private int transmitterBatteryStatus;
 
+
+    private static final Map<String, Integer> icons = new HashMap<String, Integer>();
+
+    static {
+        icons.put(FORECAST_ICON_RAIN, 0x01);
+        icons.put(FORECAST_ICON_CLOUD, 0x02);
+        icons.put(FORECAST_ICON_PARTLY_CLOUD, 0x04);
+        icons.put(FORECAST_ICON_SUN, 0x08);
+        icons.put(FORECAST_ICON_SNOW, 0x10);
+    }
+
     public CurrentRecord() {
         this.timestamp = new Date();
     }
@@ -85,6 +98,14 @@ public class CurrentRecord {
     public void setForecastIcons(final String[] forecastIcons) {
         this.forecastIcons = new String[forecastIcons.length];
         System.arraycopy(forecastIcons, 0, this.forecastIcons, 0, forecastIcons.length);
+    }
+
+    public int getForcastIconMask() {
+        int mask = 0;
+        for(String icon : getForecastIcons()) {
+            mask |= icons.get(icon);
+        }
+        return mask;
     }
 
     public String getForecastMessage() {

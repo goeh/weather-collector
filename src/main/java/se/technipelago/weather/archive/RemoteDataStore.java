@@ -169,7 +169,67 @@ public class RemoteDataStore implements DataStore {
         return null;
     }
 
-    public void updateCurrent(CurrentRecord current) throws IOException {
+    public void updateCurrent(CurrentRecord rec) throws IOException {
 
+        final Properties prop = getProperties();
+        String url = prop.getProperty("remote.url");
+        if (url == null || url.trim().length() == 0) {
+            log.fine("No REST service configured");
+            return;
+        }
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String timestamp = dateFormat.format(rec.getTimestamp());
+        StringBuilder buf = new StringBuilder();
+        String clientKey = prop.getProperty("remote.client.key");
+        String clientSecret = prop.getProperty("remote.client.secret");
+        buf.append("{\n");
+        buf.append("  \"clientKey\": \"" + clientKey + "\",\n");
+        buf.append("  \"clientSecret\": \"" + clientSecret + "\",\n");
+        buf.append("  \"data\": [\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"" + name + "barometerTrend\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getBarometerTrend() + "\n");
+        buf.append("    },\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"" + name + "icons\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getForcastIconMask() + "\n");
+        buf.append("    }\n");
+/*
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"" + name + "sunrise\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getSunrise().getTime() + "\n");
+        buf.append("    },\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"" + name + "sunset\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getSunset().getTime() + "\n");
+        buf.append("    }\n");
+
+        buf.append("  ]\n");
+        buf.append("}\n");
+*/
+        httpPost.setEntity(new StringEntity(buf.toString(), ContentType.create("application/json")));
+
+        CloseableHttpResponse response = httpclient.execute(httpPost);
+
+        try {
+            HttpEntity entity = response.getEntity();
+            // do something useful with the response body
+            // and ensure it is fully consumed
+            EntityUtils.consume(entity);
+        } finally {
+            response.close();
+        }
+
+        log.fine("Current data for " + timestamp + " sent to " + url);
     }
 }

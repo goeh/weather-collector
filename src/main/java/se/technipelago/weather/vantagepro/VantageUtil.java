@@ -23,7 +23,7 @@ import java.util.Date;
 
 /**
  * Misc helper functions.
- * 
+ *
  * @author Goran Ehrsson <goran@technipelago.se>
  */
 public class VantageUtil {
@@ -91,7 +91,7 @@ public class VantageUtil {
 
     /**
      * Compare two byte arrays.
-     * 
+     *
      * @param input the bytes to compare.
      * @param compare the reference byte array.
      * @return true if <code>input</code> starts with the same bytes as <code>compare</code>.
@@ -109,7 +109,7 @@ public class VantageUtil {
     }
 
     /**
-     * Return a date in Davis Vantage Pro format (two bytes). 
+     * Return a date in Davis Vantage Pro format (two bytes).
      * @param timestamp the date value
      * @return a byte array of size 2
      */
@@ -124,7 +124,7 @@ public class VantageUtil {
     }
 
     /**
-     * Return a time in Davis Vantage Pro format (two bytes). 
+     * Return a time in Davis Vantage Pro format (two bytes).
      * @param timestamp the time value
      * @return a byte array of size 2
      */
@@ -139,7 +139,7 @@ public class VantageUtil {
 
     /**
      * Parse Vantage Pro date into <code>java.util.Date</code>.
-     * 
+     *
      * @param buf station date format
      * @param offset byte offset where station time begins
      * @return the date in Java format.
@@ -214,7 +214,7 @@ public class VantageUtil {
      * Calculate wind chill.
      * The "Chilled" air temperature can also be expressed as a function of
      * wind velocity and ambient air temperature.
-     * 
+     *
      * @param tempC temperature in degrees Celcius
      * @param windSpeed wind speed in meters per second (m/s).
      * @return chilled air temperature

@@ -283,6 +283,9 @@ public class DownloadController extends AbstractController {
     }
 
     private boolean validate(ArchiveRecord rec) {
+        if(rec.getBarometer() < 500) {
+            return false;
+        }
         return new Date().after(rec.getTimestamp());
     }
 

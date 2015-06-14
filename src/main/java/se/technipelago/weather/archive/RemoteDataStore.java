@@ -103,50 +103,49 @@ public class RemoteDataStore implements DataStore {
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"\" + name + \"outsideHumidity\",\n");
+        buf.append("      \"sid\": \"" + name + "outsideHumidity\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getOutsideHumidity() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"\" + name + \"windSpeed\",\n");
+        buf.append("      \"sid\": \"" + name + "windSpeed\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getWindSpeedAvg() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"\" + name + \"windDirection\",\n");
+        buf.append("      \"sid\": \"" + name + "windDirection\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getWindDirection() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"\" + name + \"barometer\",\n");
+        buf.append("      \"sid\": \"" + name + "barometer\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getBarometer() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"\" + name + \"rain\",\n");
+        buf.append("      \"sid\": \"" + name + "rain\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getRainFall() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"\" + name + \"sun\",\n");
+        buf.append("      \"sid\": \"" + name + "sun\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getSolarRadiation() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"\" + name + \"uv\",\n");
+        buf.append("      \"sid\": \"" + name + "uv\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getUvIndex() + "\n");
         buf.append("    }\n");
 
         buf.append("  ]\n");
         buf.append("}\n");
-
 
         httpPost.setEntity(new StringEntity(buf.toString(), ContentType.create("application/json")));
 

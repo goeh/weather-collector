@@ -213,10 +213,10 @@ public class RemoteDataStore implements DataStore {
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getSunset().getTime() + "\n");
         buf.append("    }\n");
-
+*/
         buf.append("  ]\n");
         buf.append("}\n");
-*/
+
         httpPost.setEntity(new StringEntity(buf.toString(), ContentType.create("application/json")));
 
         CloseableHttpResponse response = httpclient.execute(httpPost);

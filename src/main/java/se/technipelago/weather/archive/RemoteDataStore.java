@@ -71,7 +71,7 @@ public class RemoteDataStore implements DataStore {
 
     public Date getLastRecordTime() {
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.HOUR_OF_DAY, -10);
+        cal.add(Calendar.HOUR_OF_DAY, -6);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);

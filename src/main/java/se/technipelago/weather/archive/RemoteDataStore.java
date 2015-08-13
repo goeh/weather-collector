@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  */
 public class RemoteDataStore implements DataStore {
 
-    private static final String PROPERTIES_FILE = "remote.properties";
+    private static final String PROPERTIES_FILE = "collector.properties";
 
     protected final Logger log = Logger.getLogger(getClass().getName());
 
@@ -81,7 +81,7 @@ public class RemoteDataStore implements DataStore {
     public boolean insertData(ArchiveRecord rec) throws IOException {
 
         final Properties prop = getProperties();
-        String url = prop.getProperty("remote.url");
+        String url = prop.getProperty("datastore.remote.url");
         if (url == null || url.trim().length() == 0) {
             log.fine("No REST service configured");
             return false;
@@ -92,8 +92,8 @@ public class RemoteDataStore implements DataStore {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         String timestamp = dateFormat.format(rec.getTimestamp());
         StringBuilder buf = new StringBuilder();
-        String clientKey = prop.getProperty("remote.client.key");
-        String clientSecret = prop.getProperty("remote.client.secret");
+        String clientKey = prop.getProperty("datastore.remote.client.key");
+        String clientSecret = prop.getProperty("datastore.remote.client.secret");
         buf.append("{\n");
         buf.append("  \"clientKey\": \"" + clientKey + "\",\n");
         buf.append("  \"clientSecret\": \"" + clientSecret + "\",\n");
@@ -175,7 +175,7 @@ public class RemoteDataStore implements DataStore {
     public void updateCurrent(CurrentRecord rec) throws IOException {
 
         final Properties prop = getProperties();
-        String url = prop.getProperty("remote.url");
+        String url = prop.getProperty("datastore.remote.url");
         if (url == null || url.trim().length() == 0) {
             log.fine("No REST service configured");
             return;
@@ -186,8 +186,8 @@ public class RemoteDataStore implements DataStore {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         String timestamp = dateFormat.format(rec.getTimestamp());
         StringBuilder buf = new StringBuilder();
-        String clientKey = prop.getProperty("remote.client.key");
-        String clientSecret = prop.getProperty("remote.client.secret");
+        String clientKey = prop.getProperty("datastore.remote.client.key");
+        String clientSecret = prop.getProperty("datastore.remote.client.secret");
         buf.append("{\n");
         buf.append("  \"clientKey\": \"" + clientKey + "\",\n");
         buf.append("  \"clientSecret\": \"" + clientSecret + "\",\n");

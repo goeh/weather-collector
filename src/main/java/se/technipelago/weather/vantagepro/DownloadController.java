@@ -29,6 +29,7 @@ import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.archive.DataStore;
 import se.technipelago.weather.archive.RemoteDataStore;
+import se.technipelago.weather.archive.SqlDataStore;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,13 +47,18 @@ import java.util.logging.Level;
  */
 public class DownloadController extends AbstractController {
 
-    private static final String PROPERTIES_FILE = "remote.properties";
-    private final DataStore store = new RemoteDataStore("moja.");
-    //private final DataStore store = new SqlDataStore();
+    private static final String COLLECTOR_PROPERTIES = "collector.properties";
+    private DataStore store;
 
     public static void main(String[] args) {
         try {
-            new DownloadController().startLocal(args);
+            String firstArg = args.length > 0 ? args[0] : "localhost";
+            DownloadController controller = new DownloadController();
+            if(firstArg.indexOf('/') != -1) {
+                controller.startLocal(args); // Local serial device
+            } else {
+                controller.start(args); // Remote virtual device
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -73,16 +79,16 @@ public class DownloadController extends AbstractController {
         }
     }
 
-    private Properties getProperties() {
+    private Properties getProperties(String filename) {
         final Properties prop = new Properties();
         InputStream fis = null;
         try {
-            File file = new File(PROPERTIES_FILE);
+            File file = new File(filename);
             if (file.exists()) {
                 fis = new FileInputStream(file);
                 prop.load(fis);
             } else {
-                log.log(Level.WARNING, PROPERTIES_FILE + " not found, data will not be pushed to remote service.");
+                log.log(Level.WARNING, filename + " not found.");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -98,6 +104,13 @@ public class DownloadController extends AbstractController {
     }
 
     public void init() {
+        final Properties prop = getProperties(COLLECTOR_PROPERTIES);
+        String value = prop.getProperty("datastore.type");
+        if("jdbc".equals(value)) {
+            store = new SqlDataStore();
+        } else {
+            store = new RemoteDataStore(prop.getProperty("datastore.name") + ".");
+        }
         store.init();
     }
 
@@ -315,8 +328,8 @@ public class DownloadController extends AbstractController {
     }
 
     private void postToExternal(ArchiveRecord rec) throws IOException {
-        final Properties prop = getProperties();
-        String url = prop.getProperty("remote.url");
+        final Properties prop = getProperties(COLLECTOR_PROPERTIES);
+        String url = prop.getProperty("datastore.remote.url");
         if(url == null || url.trim().length() == 0) {
             log.fine("No REST service configured");
             return;
@@ -327,8 +340,8 @@ public class DownloadController extends AbstractController {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         String timestamp = dateFormat.format(rec.getTimestamp());
         StringBuilder buf = new StringBuilder();
-        String clientKey = prop.getProperty("remote.client.key");
-        String clientSecret = prop.getProperty("remote.client.secret");
+        String clientKey = prop.getProperty("datastore.remote.client.key");
+        String clientSecret = prop.getProperty("datastore.remote.client.secret");
         buf.append("{\n");
         buf.append("  \"clientKey\": \"" + clientKey + "\",\n");
         buf.append("  \"clientSecret\": \"" + clientSecret + "\",\n");
@@ -347,13 +360,13 @@ public class DownloadController extends AbstractController {
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"cellarTemperature\",\n");
+        buf.append("      \"sid\": \"greenhouseTemperature\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getExtraTemperature1() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"cellarHumidity\",\n");
+        buf.append("      \"sid\": \"greenhouseHumidity\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getExtraHumidity1() + "\n");
         buf.append("    }\n");

@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 public class SqlDataStore implements DataStore {
 
     private static final Logger log = Logger.getLogger(SqlDataStore.class.getName());
-    private static final String PROPERTIES_FILE = "datastore.properties";
+    private static final String PROPERTIES_FILE = "collector.properties";
     private Connection conn;
     private PreparedStatement selectStatus;
     private PreparedStatement updateStatus;

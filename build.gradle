@@ -4,7 +4,7 @@ apply plugin: 'application'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-version = '1.3'
+version = '1.4'
 mainClassName = "se.technipelago.weather.vantagepro.DownloadController"
 
 defaultTasks 'clean', 'distZip'
@@ -20,8 +20,8 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.1'
-    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.28'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.4.1'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.35'
     compile 'org.scream3r:jssc:2.8.0'
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

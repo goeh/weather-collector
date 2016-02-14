@@ -2,10 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.technipelago.weather.vantagepro;
+package se.technipelago.weather.vantagepro;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -25,7 +26,7 @@ public class VantageUtilTest {
         double celcius = 0.0;
         double expResult = 32.0;
         double result = VantageUtil.celcius2fahrenheit(celcius);
-        assertEquals(expResult, result);
+        assertEquals(expResult, result, 0.1);
     }
 
     /**
@@ -37,7 +38,7 @@ public class VantageUtilTest {
         double f = 32.0;
         double expResult = 0.0;
         double result = VantageUtil.fahrenheit2celcius(f);
-        assertEquals(expResult, result);
+        assertEquals(expResult, result, 0.1);
     }
 
     /**
@@ -49,7 +50,7 @@ public class VantageUtilTest {
         int mb = 1016;
         double expResult = 30.0;
         double result = VantageUtil.millibar2inchHg(mb);
-        assertEquals(expResult, result);
+        assertEquals(expResult, result, 0.1);
     }
 
     /**
@@ -85,7 +86,7 @@ public class VantageUtilTest {
         int mph = 224;
         double expResult = 100.8;
         double result = VantageUtil.mph2ms(mph);
-        assertEquals(expResult, result);
+        assertEquals(expResult, result, 0.1);
     }
 
     /**
@@ -97,7 +98,7 @@ public class VantageUtilTest {
         int mm = 254;
         double expResult = 10.0;
         double result = VantageUtil.mm2inch(mm);
-        assertEquals(expResult, result);
+        assertEquals(expResult, result, 0.1);
     }
 
     /**

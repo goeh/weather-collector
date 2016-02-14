@@ -1,4 +1,4 @@
-package se.technipelago.weather.archive;
+package se.technipelago.opensensor;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -25,7 +25,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import se.technipelago.opensensor.OpenSensorPayload;
+import se.technipelago.weather.archive.ArchiveRecord;
+import se.technipelago.weather.archive.CurrentRecord;
+import se.technipelago.weather.archive.DataStore;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -2,7 +2,6 @@ package se.technipelago.opensensor;
 
 import org.junit.Test;
 import se.technipelago.weather.archive.ArchiveRecord;
-import se.technipelago.weather.archive.OpenSensorDataStore;
 
 import java.util.Date;
 

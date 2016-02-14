@@ -28,7 +28,7 @@ import se.technipelago.weather.archive.ArchivePage;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.archive.DataStore;
-import se.technipelago.weather.archive.OpenSensorDataStore;
+import se.technipelago.opensensor.OpenSensorDataStore;
 import se.technipelago.weather.archive.RemoteDataStore;
 import se.technipelago.weather.archive.SqlDataStore;
 

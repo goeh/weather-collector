@@ -28,6 +28,7 @@ import se.technipelago.weather.archive.ArchivePage;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.archive.DataStore;
+import se.technipelago.weather.archive.OpenSensorDataStore;
 import se.technipelago.weather.archive.RemoteDataStore;
 import se.technipelago.weather.archive.SqlDataStore;
 
@@ -108,6 +109,8 @@ public class DownloadController extends AbstractController {
         String value = prop.getProperty("datastore.type");
         if("jdbc".equals(value)) {
             store = new SqlDataStore();
+        } else if("opensensor".equals(value)) {
+            store = new OpenSensorDataStore();
         } else {
             store = new RemoteDataStore(prop.getProperty("datastore.name") + ".");
         }

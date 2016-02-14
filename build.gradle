@@ -20,6 +20,7 @@ repositories {
 }
 
 dependencies {
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.7.1-1'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.1'
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.35'
     compile 'org.scream3r:jssc:2.8.0'

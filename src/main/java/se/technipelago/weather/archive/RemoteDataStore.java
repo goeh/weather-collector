@@ -118,6 +118,12 @@ public class RemoteDataStore implements DataStore {
         buf.append("    },\n");
 
         buf.append("    {\n");
+        buf.append("      \"sid\": \"" + name + "windGusts\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getWindSpeedHigh() + "\n");
+        buf.append("    },\n");
+
+        buf.append("    {\n");
         buf.append("      \"sid\": \"" + name + "windDirection\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getWindDirection() + "\n");

@@ -11,6 +11,8 @@ collecting weather data every 10 minutes without interruption.
 Since 2017 a Raspberry Pi 3 has taken over the task of downloading weather data at my home.
 No changes to the program needed.
 
+See https://github.com/goeh/weather-visualizer for how data can be visualized.
+
 ## Build
 
     ./gradlew

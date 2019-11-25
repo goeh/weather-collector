@@ -2,9 +2,9 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'application'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-version = '1.4.2-SNAPSHOT'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+version = '1.4.2'
 mainClassName = "se.technipelago.weather.vantagepro.DownloadController"
 
 defaultTasks 'clean', 'distZip'

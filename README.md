@@ -1,4 +1,5 @@
 # Weather Data Collector
+
 ## A data collector written in Java that collects data from weather stations.
 
 This project was developed by me when I wanted to collect data from my
@@ -10,7 +11,11 @@ collecting weather data every 10 minutes without interruption.
 Since 2017 a Raspberry Pi 3 has taken over the task of downloading weather data at my home.
 No changes to the program needed.
 
-### Start script for Raspberry Pi (Raspbian)
+## Build
+
+    ./gradlew
+
+## Start script for Raspberry Pi (Raspbian)
 
     #!/bin/bash
     #
@@ -23,7 +28,7 @@ No changes to the program needed.
     cd $COLLECTOR_HOME
     bin/weather-collector $SERIAL_PORT $SERIAL_BAUD
 
-### Sample collector.properties
+## Sample collector.properties
 
 Put `collector.properties` in the `weather-collector-1.4.1` directory and `cd` to that directory before you start the program.
 
@@ -32,7 +37,7 @@ Put `collector.properties` in the `weather-collector-1.4.1` directory and `cd` t
     datastore.jdbc.driver=com.mysql.jdbc.Driver
     datastore.jdbc.url=jdbc:mysql://localhost:3306/weather?user=weather&password=weather
 
-### Sample collector-logging.properties
+## Sample collector-logging.properties
 
 Put `collector-logging.properties` in the `weather-collector-1.4.1` directory.
 

@@ -4,7 +4,7 @@
 
 This project was developed by me when I wanted to collect data from my
 weather station (Davis Vantage Pro2) and I did not want to use a
-Windows server for the job. I have a Ubuntu LAMP server in the closet
+Windows server for the job. I have an Ubuntu LAMP server in the closet,
 and it has been running this data collector since 2008,
 collecting weather data every 10 minutes without interruption.
 

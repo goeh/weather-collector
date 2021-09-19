@@ -81,7 +81,7 @@ public class OpenSensorDataStore implements DataStore {
 
     @Override
     public void init() {
-
+        log.fine("Open Sensor datastore initialized");
     }
 
     @Override

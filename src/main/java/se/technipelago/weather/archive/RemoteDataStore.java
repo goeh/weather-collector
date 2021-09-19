@@ -62,7 +62,7 @@ public class RemoteDataStore implements DataStore {
     }
 
     public void init() {
-
+        log.fine("Remote datastore [" + name + "] initialized");
     }
 
     public void cleanup() {

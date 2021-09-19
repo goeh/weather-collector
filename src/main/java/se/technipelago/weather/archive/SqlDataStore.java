@@ -87,6 +87,7 @@ public class SqlDataStore implements DataStore {
                 log.log(Level.SEVERE, "Cannot connect to database", e);
                 throw new RuntimeException(e);
             }
+            log.fine("SQL datastore initialized");
         }
 
         if (selectData == null) {

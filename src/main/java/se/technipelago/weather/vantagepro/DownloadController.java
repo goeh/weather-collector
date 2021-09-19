@@ -107,15 +107,14 @@ public class DownloadController extends AbstractController {
     public void init() {
         final Properties prop = getProperties(COLLECTOR_PROPERTIES);
         String value = prop.getProperty("datastore.type");
-        if("jdbc".equals(value)) {
-            store = new SqlDataStore();
+        if("remote".equals(value)) {
+            store = new RemoteDataStore(prop.getProperty("datastore.name") + ".");
         } else if("opensensor".equals(value)) {
             store = new OpenSensorDataStore();
         } else {
-            store = new RemoteDataStore(prop.getProperty("datastore.name") + ".");
+            store = new SqlDataStore();
         }
         store.init();
-        log.fine("Datastore [" + value + "] initialized");
     }
 
     public void cleanup() {

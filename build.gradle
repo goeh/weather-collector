@@ -1,10 +1,14 @@
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'application'
+plugins {
+    id 'java'
+    id 'idea'
+    id 'application'
+}
+
+group 'se.technipelago'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-version = '1.4.2'
+def version = '1.4.2'
 mainClassName = "se.technipelago.weather.vantagepro.DownloadController"
 
 defaultTasks 'clean', 'distZip'
@@ -16,13 +20,13 @@ jar {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.7.4'
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.10'
-    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.48'
-    compile 'org.scream3r:jssc:2.8.0'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    implementation 'mysql:mysql-connector-java:8.0.25'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.5'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'org.scream3r:jssc:2.8.0'
 }

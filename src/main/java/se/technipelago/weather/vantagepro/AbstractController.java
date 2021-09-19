@@ -84,7 +84,7 @@ public abstract class AbstractController {
     }
 
     protected void startLocal(String[] args) throws IOException {
-        String portName = args.length > 0 ? args[0] : "/dev/cu.SLAB_USBtoUART"; //"/dev/ttyUSB0";
+        String portName = args.length > 0 ? args[0] : "/dev/ttyUSB0";
         int baud = args.length > 1 ? Integer.parseInt(args[1]) : 19200;
         SerialPort serialPort = new SerialPort(portName);
         RingBuffer buffer = new RingBuffer();
@@ -312,6 +312,7 @@ public abstract class AbstractController {
         if (startRecord == null) {
             throw new IllegalArgumentException("startRecord must be != null");
         }
+        log.fine("Downloading records after " + startRecord);
         writeString("DMPAFT\n");
         if (in.read() != Constants.ACK) {
             throw new IOException("Invalid response");

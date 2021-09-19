@@ -115,6 +115,7 @@ public class DownloadController extends AbstractController {
             store = new RemoteDataStore(prop.getProperty("datastore.name") + ".");
         }
         store.init();
+        log.fine("Datastore [" + value + "] initialized");
     }
 
     public void cleanup() {

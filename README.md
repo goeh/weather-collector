@@ -13,26 +13,60 @@ No changes to the program needed.
 
 See https://github.com/goeh/weather-visualizer for how data can be visualized.
 
+### Prerequisites
+
+#### git
+
+To download and build from source, git must be installed on the Raspberry Pi.
+To install git, use the following command:
+
+    sudo apt-get install git
+
+#### Java
+
+Java must be installed on the Raspberry Pi prior to building and running the programs.
+To install the default JDK, use the following command:
+
+    sudo apt-get install default-jdk
+
+Or to install a specific version:
+
+    sudo apt-get install openjdk-11-jdk
+
 ## Build
 
     ./gradlew
+
+When the build finish successfully, you will find `weather-collector.zip` in ./build/distributions.
+Extract the archive where you want to install the program, for example in /home/pi/weather.
+Then go to the folder where you extracted the archive and start the weather collector.
+
+## Run
+
+    bin/weather-collector /dev/ttyUSB0 19200
+
+The default database engine is H2 (www.h2database.com) and data is stored in a file called `weather-db.mv.db`.
+You can configure another JDBC database using the `datastore.xxx` properties (see below).
+A suitable JDBC driver .jar must be located in the weather-collector-1.4.2/lib folder at runtime.
+
+To make it easier to start the collector from `cron` or from the command line, create a start script.
 
 ## Start script for Raspberry Pi (Raspbian)
 
     #!/bin/bash
     #
-    WEATHER_HOME=$HOME
-    COLLECTOR_HOME=$WEATHER_HOME/weather-collector-1.4.1
+    WEATHER_HOME=$HOME/weather
+    COLLECTOR_HOME=$WEATHER_HOME/weather-collector-1.4.2
     SERIAL_PORT=/dev/ttyUSB0
-    SERIAL_BAUD=9600
+    SERIAL_BAUD=19200
     
-    export COLLECTOR_OPTS="-Djava.util.logging.config.file=$COLLECTOR_HOME/collector-logging.properties"
+    export WEATHER_COLLECTOR_OPTS="-Djava.util.logging.config.file=$COLLECTOR_HOME/collector-logging.properties"
     cd $COLLECTOR_HOME
     bin/weather-collector $SERIAL_PORT $SERIAL_BAUD
 
 ## Sample collector.properties
 
-Put `collector.properties` in the `weather-collector-1.4.1` directory and `cd` to that directory before you start the program.
+Put `collector.properties` in the `weather-collector-1.4.2` directory and `cd` to that directory before you start the program.
 
     datastore.type=jdbc
     datastore.name=weather
@@ -41,16 +75,26 @@ Put `collector.properties` in the `weather-collector-1.4.1` directory and `cd` t
 
 ## Sample collector-logging.properties
 
-Put `collector-logging.properties` in the `weather-collector-1.4.1` directory.
+Put `collector-logging.properties` in the `weather-collector-1.4.2` directory.
+
+Log to console (debug logging)
+
+    handlers = java.util.logging.ConsoleHandler
+
+    java.util.logging.ConsoleHandler.level = INFO
+    java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter
+    java.util.logging.SimpleFormatter.format=%1$tb %1$td, %1$tY %1$tl:%1$tM:%1$tS %1$Tp %2$s %4$s: %5$s%n
+
+    se.technipelago.level = ALL
+
+Log to file (production logging)
 
     handlers = java.util.logging.FileHandler
     
-    java.util.logging.FileHandler.level = ALL
+    java.util.logging.FileHandler.level = INFO
     java.util.logging.FileHandler.pattern = collector.log
     java.util.logging.FileHandler.limit = 100000
     java.util.logging.FileHandler.count = 5
     java.util.logging.FileHandler.append= true
     java.util.logging.FileHandler.formatter = java.util.logging.SimpleFormatter
     java.util.logging.SimpleFormatter.format=%1$tb %1$td, %1$tY %1$tl:%1$tM:%1$tS %1$Tp %2$s %4$s: %5$s%n
-    
-    se.technipelago.level = INFO

@@ -58,7 +58,7 @@ public class SqlDataStore implements DataStore {
                 fis = new FileInputStream(file);
                 prop.load(fis);
             } else {
-                log.log(Level.WARNING, PROPERTIES_FILE + " not found, using HSQL file storage.");
+                log.log(Level.WARNING, PROPERTIES_FILE + " not found, using default storage.");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

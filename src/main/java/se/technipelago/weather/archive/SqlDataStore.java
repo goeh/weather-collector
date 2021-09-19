@@ -77,8 +77,8 @@ public class SqlDataStore implements DataStore {
         if (conn == null) {
             try {
                 final Properties prop = getProperties();
-                Class.forName(prop.getProperty("datastore.jdbc.driver", "org.hsqldb.jdbcDriver"));
-                conn = DriverManager.getConnection(prop.getProperty("datastore.jdbc.url", "jdbc:hsqldb:file:weatherDb;shutdown=true"));
+                Class.forName(prop.getProperty("datastore.jdbc.driver", "org.h2.Driver"));
+                conn = DriverManager.getConnection(prop.getProperty("datastore.jdbc.url", "jdbc:h2:file:./weatherDb"));
                 createTables();
             } catch (ClassNotFoundException e) {
                 log.log(Level.SEVERE, "Cannot find JDBC driver", e);
@@ -321,5 +321,6 @@ public class SqlDataStore implements DataStore {
         } finally {
             stmt.close();
         }
+        log.fine("Database tables created successfully");
     }
 }

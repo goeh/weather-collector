@@ -49,6 +49,10 @@ The default database engine is H2 (www.h2database.com) and data is stored in a f
 You can configure another JDBC database using the `datastore.xxx` properties (see below).
 A suitable JDBC driver .jar must be located in the weather-collector-1.4.2/lib folder at runtime.
 
+The first time you run the program with an empty database, it downloads **all** records from the weather station.
+This can take a long time (10 minutes). The next time you run the program,
+it will only download records created since the last download, so that should only take a few seconds.
+
 To make it easier to start the collector from `cron` or from the command line, create a start script.
 
 ## Start script for Raspberry Pi (Raspbian)
@@ -74,6 +78,10 @@ Put `collector.properties` in the `weather-collector-1.4.2` directory and `cd` t
     datastore.jdbc.url=jdbc:mysql://localhost:3306/weather?user=weather&password=weather
 
 ## Sample collector-logging.properties
+
+Full debug logging to the console can be great the first time you run the program,
+to see that things works ok.
+Later you can configure a file logger with reduced logging  in production.
 
 Put `collector-logging.properties` in the `weather-collector-1.4.2` directory.
 

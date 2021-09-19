@@ -13,16 +13,16 @@ No changes to the program needed.
 
 See https://github.com/goeh/weather-visualizer for how data can be visualized.
 
-### Prerequisites
+## Prerequisites
 
-#### git
+### git
 
 To download and build from source, git must be installed on the Raspberry Pi.
 To install git, use the following command:
 
     sudo apt-get install git
 
-#### Java
+### Java
 
 Java must be installed on the Raspberry Pi prior to building and running the programs.
 To install the default JDK, use the following command:
@@ -55,7 +55,7 @@ it will only download records created since the last download, so that should on
 
 To make it easier to start the collector from `cron` or from the command line, create a start script.
 
-## Start script for Raspberry Pi (Raspbian)
+### Start script for Raspberry Pi (Raspbian)
 
     #!/bin/bash
     #
@@ -68,7 +68,7 @@ To make it easier to start the collector from `cron` or from the command line, c
     cd $COLLECTOR_HOME
     bin/weather-collector $SERIAL_PORT $SERIAL_BAUD
 
-## Sample collector.properties
+### Sample collector.properties
 
 Put `collector.properties` in the `weather-collector-1.4.2` directory and `cd` to that directory before you start the program.
 
@@ -77,7 +77,7 @@ Put `collector.properties` in the `weather-collector-1.4.2` directory and `cd` t
     datastore.jdbc.driver=com.mysql.jdbc.Driver
     datastore.jdbc.url=jdbc:mysql://localhost:3306/weather?user=weather&password=weather
 
-## Sample collector-logging.properties
+### Sample collector-logging.properties
 
 Full debug logging to the console can be great the first time you run the program,
 to see that things works ok.

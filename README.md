@@ -33,6 +33,8 @@ Or to install a specific version:
 
     sudo apt-get install openjdk-11-jdk
 
+Suggest taking a look at [sdkman](https://sdkman.io/) to easily manage different Java and/or Gradle versions!
+
 ## Build
 
     ./gradlew
@@ -43,7 +45,9 @@ Then go to the folder where you extracted the archive and start the weather coll
 
 ## Run
 
-    bin/weather-collector /dev/ttyUSB0 19200
+    bin/weather-collector-VERSION /dev/ttyUSB0 19200
+
+With `VERSION` being equal to the release version e.g. `1.4.2`.
 
 The default database engine is H2 (www.h2database.com) and data is stored in a file called `weather-db.mv.db`.
 You can configure another JDBC database using the `datastore.xxx` properties (see below).
@@ -60,7 +64,8 @@ To make it easier to start the collector from `cron` or from the command line, c
     #!/bin/bash
     #
     WEATHER_HOME=$HOME/weather
-    COLLECTOR_HOME=$WEATHER_HOME/weather-collector-1.4.2
+    VERSION=1.4.2       # Example
+    COLLECTOR_HOME=$WEATHER_HOME/weather-collector-$VERSION
     SERIAL_PORT=/dev/ttyUSB0
     SERIAL_BAUD=19200
     
@@ -70,7 +75,7 @@ To make it easier to start the collector from `cron` or from the command line, c
 
 ### Sample collector.properties
 
-Put `collector.properties` in the `weather-collector-1.4.2` directory and `cd` to that directory before you start the program.
+Put `collector.properties` in the `weather-collector-VERSION` directory and `cd` to that directory before you start the program.
 
     datastore.type=jdbc
     datastore.name=weather
@@ -83,7 +88,7 @@ Full debug logging to the console can be great the first time you run the progra
 to see that things works ok.
 Later you can configure a file logger with reduced logging  in production.
 
-Put `collector-logging.properties` in the `weather-collector-1.4.2` directory.
+Put `collector-logging.properties` in the `weather-collector-VERSION` directory.
 
 Log to console (debug logging)
 

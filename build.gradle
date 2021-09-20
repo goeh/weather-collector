@@ -26,8 +26,8 @@ repositories {
 dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.5'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
-    implementation 'org.scream3r:jssc:2.8.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    implementation 'io.github.java-native:jssc:2.9.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
     runtimeOnly 'mysql:mysql-connector-java:8.0.25'
     runtimeOnly 'com.h2database:h2:1.4.200'
 }

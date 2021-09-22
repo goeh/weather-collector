@@ -7,7 +7,7 @@ package se.technipelago.weather.vantagepro;
 import java.io.ByteArrayOutputStream;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  *

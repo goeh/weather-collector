@@ -1,6 +1,6 @@
 package se.technipelago.opensensor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import se.technipelago.weather.archive.ArchiveRecord;
 
 import java.util.Date;

@@ -39,7 +39,7 @@ public class CRCTest {
         byte[] crc = new byte[]{(byte) 0xe2, (byte) 0xb4};
         byte[] test = CRC16.calculate(data);
         Assert.assertTrue("CRC high byte invalid", test[0] == crc[0]);
-        Assert.assertTrue("CRC low byte invald", test[1] == crc[1]);
+        Assert.assertTrue("CRC low byte invalid", test[1] == crc[1]);
     }
 
     /**
@@ -61,7 +61,7 @@ public class CRCTest {
         }
         System.out.println(buf.toString());
         Assert.assertTrue("CRC high byte invalid", test[0] == crc[0]);
-        Assert.assertTrue("CRC low byte invald", test[1] == crc[1]);
+        Assert.assertTrue("CRC low byte invalid", test[1] == crc[1]);
         Assert.assertTrue("CRC check failed", CRC16.check(data, crc));
     }
 
@@ -84,7 +84,7 @@ public class CRCTest {
         }
         System.out.println(buf.toString());
         Assert.assertTrue("CRC high byte invalid", test[0] == crc[0]);
-        Assert.assertTrue("CRC low byte invald", test[1] == crc[1]);
+        Assert.assertTrue("CRC low byte invalid", test[1] == crc[1]);
         Assert.assertTrue("CRC check failed", CRC16.check(data, crc));
     }
 
@@ -108,7 +108,7 @@ public class CRCTest {
         out.write(data);
         byte[] test = out.getCRC();
         Assert.assertTrue("CRC high byte invalid", test[0] == crc[0]);
-        Assert.assertTrue("CRC low byte invald", test[1] == crc[1]);
+        Assert.assertTrue("CRC low byte invalid", test[1] == crc[1]);
         byte[] bytes = ba.toByteArray();
         for (int i = 0; i < data.length; i++) {
             Assert.assertTrue("Invalid byte at pos " + i, data[i] == bytes[i]);

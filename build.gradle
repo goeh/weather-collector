@@ -28,6 +28,7 @@ dependencies {
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'io.github.java-native:jssc:2.9.4'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
     runtimeOnly 'mysql:mysql-connector-java:8.0.25'
     runtimeOnly 'com.h2database:h2:1.4.200'
 }

@@ -285,7 +285,7 @@ public class SqlDataStore implements DataStore {
         try {
             stmt = conn.createStatement();
             if (!tablesFound.contains("archive")) {
-                stmt.executeUpdate("CREATE TABLE archive ("
+                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS not  archive ("
                         + "id int NOT NULL AUTO_INCREMENT,"
                         + "ts datetime NOT NULL," /* UNIQUE */
                         + "temp_out float NULL,"
@@ -303,7 +303,7 @@ public class SqlDataStore implements DataStore {
                         + "PRIMARY KEY (id));");
             }
             if (!tablesFound.contains("current")) {
-                stmt.executeUpdate("CREATE TABLE current ("
+                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS current ("
                         + "id int AUTO_INCREMENT,"
                         + "bar_trend smallint NULL,"
                         + "console_battery float NULL,"
@@ -316,7 +316,7 @@ public class SqlDataStore implements DataStore {
                         + "PRIMARY KEY (id));");
             }
             if (!tablesFound.contains("status")) {
-                stmt.executeUpdate("CREATE TABLE status ("
+                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS status ("
                         + "id int AUTO_INCREMENT,"
                         + "last_dl datetime NOT NULL,"
                         + "last_rec datetime NOT NULL,"

@@ -287,7 +287,7 @@ public class SqlDataStore implements DataStore {
             if (!tablesFound.contains("archive")) {
                 stmt.executeUpdate("CREATE TABLE IF NOT EXISTS not  archive ("
                         + "id int NOT NULL AUTO_INCREMENT,"
-                        + "ts datetime NOT NULL," /* UNIQUE */
+                        + "ts datetime NOT NULL,"
                         + "temp_out float NULL,"
                         + "temp_in float NULL,"
                         + "hum_out smallint NULL,"

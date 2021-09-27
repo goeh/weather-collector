@@ -100,7 +100,7 @@ public class CurrentRecord {
         System.arraycopy(forecastIcons, 0, this.forecastIcons, 0, forecastIcons.length);
     }
 
-    public int getForcastIconMask() {
+    public int getForecastIconMask() {
         int mask = 0;
         for(String icon : getForecastIcons()) {
             mask |= icons.get(icon);

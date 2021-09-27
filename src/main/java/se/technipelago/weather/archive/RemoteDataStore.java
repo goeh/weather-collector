@@ -208,7 +208,7 @@ public class RemoteDataStore implements DataStore {
         buf.append("    {\n");
         buf.append("      \"sid\": \"" + name + "icons\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
-        buf.append("      \"value\": " + rec.getForcastIconMask() + "\n");
+        buf.append("      \"value\": " + rec.getForecastIconMask() + "\n");
         buf.append("    }\n");
 /*
         buf.append("    {\n");

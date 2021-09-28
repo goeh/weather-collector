@@ -17,7 +17,6 @@
 package nl.tudelft.streaming;
 
 import org.apache.pulsar.client.api.*;
-import org.apache.pulsar.client.impl.schema.JSONSchema;
 
 import java.io.IOException;
 
@@ -38,15 +37,15 @@ public class DavisProducer {
                 )
                 .build();
 
-        Producer<Davis> producer = client.newProducer(JSONSchema.of(Davis.class))
+        Producer<DavisMessage> producer = client.newProducer(Schema.AVRO(DavisMessage.class))
                 .topic(properties.getProperty("pulsar.topic"))
                 .create();
 
         // Send a message to the topic
-        producer.newMessage().value(Davis.builder()
-                .ts("timestamp")
+        producer.newMessage()
+                .value(DavisMessage)
                 .temp_out((float) 18.5556)
-                .build()).send();
+                .build().send();
 
         producer.close();
 

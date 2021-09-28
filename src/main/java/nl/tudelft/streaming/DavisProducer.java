@@ -45,7 +45,7 @@ public class DavisProducer {
         // Send a message to the topic
         producer.newMessage().value(DavisSchema.builder()
                 .ts("timestamp")
-                .temp_out(15.6)
+                .temp_out(18.5556)
                 .build()).send();
 
         producer.close();

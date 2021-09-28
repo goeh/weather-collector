@@ -1,4 +1,12 @@
 package nl.tudelft.streaming;
 
-public class DavisSchema {
+import org.apache.pulsar.client.api.*;
+import org.apache.pulsar.client.all;
+
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public static class DavisSchema {
+    String ts;
+    float temp_out;
 }

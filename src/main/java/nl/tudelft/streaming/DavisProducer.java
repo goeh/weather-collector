@@ -38,14 +38,14 @@ public class DavisProducer {
                 )
                 .build();
 
-        Producer<DavisSchema> producer = client.newProducer(JSONSchema.of(DavisSchema.class))
+        Producer<Davis> producer = client.newProducer(JSONSchema.of(Davis.class))
                 .topic(properties.getProperty("pulsar.topic"))
                 .create();
 
         // Send a message to the topic
-        producer.newMessage().value(DavisSchema.builder()
+        producer.newMessage().value(Davis.builder()
                 .ts("timestamp")
-                .temp_out(18.5556)
+                .temp_out((float) 18.5556)
                 .build()).send();
 
         producer.close();

@@ -9,6 +9,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Davis {
     String ts;
-    double temp_out;
-    double temp_in;
+    float temp_out;
+    float temp_in;
+    int hum_out;
+    int hum_in;
+    int barometer;
+    float rain;
+    float rain_rate;
+    float wind_avg;
+    int wind_dir;
+    float wind_high;
+    int solar;
+    float uv;
 }

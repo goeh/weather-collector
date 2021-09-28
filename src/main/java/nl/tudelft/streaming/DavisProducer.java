@@ -18,7 +18,6 @@ package nl.tudelft.streaming;
 
 import org.apache.pulsar.client.api.*;
 import java.io.IOException;
-import java.util.Properties.getProperty;
 
 /**
  *
@@ -31,14 +30,14 @@ public class DavisProducer {
         properties.getPropValues();
 
         PulsarClient client = PulsarClient.builder()
-                .serviceUrl(properties.getProperty("SERVICE_URL"))
+                .serviceUrl(properties.getProperty("pulsar.service_url"))
                 .authentication(
-                        AuthenticationFactory.token("verylongtokenhere")
+                        AuthenticationFactory.token(properties.getProperty("pulsar.token"))
                 )
                 .build();
 
         Producer<byte[]> producer = client.newProducer()
-                .topic("sometopichere")
+                .topic(properties.getProperty("pulsar.topic"))
                 .create();
 
         // Send a message to the topic

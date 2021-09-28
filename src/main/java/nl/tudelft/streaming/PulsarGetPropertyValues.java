@@ -24,7 +24,7 @@ import java.util.Properties;
  *
  * @author Saverio Guzzo <saverio.g.guzzo@gmail.com>
  */
-public class PulsarGetPropertyValues {
+public class PulsarGetPropertyValues extends Properties {
 
     //static?
     public Properties getPropValues() {

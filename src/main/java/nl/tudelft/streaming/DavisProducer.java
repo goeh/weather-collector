@@ -18,8 +18,7 @@ package nl.tudelft.streaming;
 
 import org.apache.pulsar.client.api.*;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.util.Properties.getProperty;
 
 /**
  *
@@ -32,8 +31,7 @@ public class DavisProducer {
         properties.getPropValues();
 
         PulsarClient client = PulsarClient.builder()
-                // TODO fix how to access this
-                .serviceUrl(properties.get("SERVICE_URL"))
+                .serviceUrl(properties.getProperty("SERVICE_URL"))
                 .authentication(
                         AuthenticationFactory.token("verylongtokenhere")
                 )

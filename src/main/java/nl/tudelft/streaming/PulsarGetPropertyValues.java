@@ -1,42 +1,51 @@
+/*
+ *  Copyright 2021 Saverio Guzzo.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
+ */
 package nl.tudelft.streaming;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Properties;
 
+/**
+ *
+ * @author Saverio Guzzo <saverio.g.guzzo@gmail.com>
+ */
 public class PulsarGetPropertyValues {
-    HashMap<String, String> prop = new HashMap<String, String>();
-    InputStream inputStream;
 
-    public HashMap<String, String> getPropValues() throws IOException {
+    //static?
+    public Properties getPropValues() {
+        Properties prop = new Properties();
 
-        try {
-            Properties prop = new Properties();
-            String propFileName = "pulsar.properties";
+        try (InputStream input = PulsarGetPropertyValues.class.getClassLoader().getResourceAsStream("pulsar.properties")) {
 
-            inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-
-            if (inputStream != null) {
-                prop.load(inputStream);
-            } else {
-                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+            if (input == null) {
+                System.out.println("Sorry, unable to find config.properties");
             }
 
-            String service_url = prop.getProperty("service_url");
-            String token = prop.getProperty("token");
-            String topic = prop.getProperty("topic");
+            //load a properties file from class path, inside static method
+            prop.load(input);
 
-            prop.put("SERVICE_URL", service_url);
-            prop.put("TOKEN", token);
-            prop.put("TOPIC", topic);
+            //get the property value and print it out
+            //System.out.println(prop.getProperty("pulsar.service_url"));
+            //System.out.println(prop.getProperty("pulsar.token"));
+            //System.out.println(prop.getProperty("pulsar.topic"));
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            assert inputStream != null;
-            inputStream.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
         return prop;
     }

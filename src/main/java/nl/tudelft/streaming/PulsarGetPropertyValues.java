@@ -39,10 +39,6 @@ public class PulsarGetPropertyValues extends Properties {
             //load a properties file from class path, inside static method
             prop.load(input);
 
-            //get the property value and print it out
-            //System.out.println(prop.getProperty("pulsar.service_url"));
-            //System.out.println(prop.getProperty("pulsar.token"));
-            //System.out.println(prop.getProperty("pulsar.topic"));
 
         } catch (IOException ex) {
             ex.printStackTrace();

@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -25,6 +22,7 @@ import se.technipelago.opensensor.OpenSensorPayload;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.archive.DataStore;
+import se.technipelago.pulsar.DavisMessage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 public class PulsarDataStore implements DataStore {
 
@@ -85,30 +84,6 @@ public class PulsarDataStore implements DataStore {
         return cal.getTime();
     }
 
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    private static class DavisMessage {
-        String uuid;
-        float latitude;
-        float longitude;
-        float altitude;
-        String ts;
-        float temp_out;
-        float temp_in;
-        int hum_out;
-        int hum_in;
-        int barometer;
-        float rain;
-        float rain_rate;
-        float wind_avg;
-        int wind_dir;
-        float wind_high;
-        int solar;
-        float uv;
-    }
-
-    // TODO add return statement (boolean)
     @Override
     public boolean insertData(ArchiveRecord rec) throws IOException {
 
@@ -140,11 +115,13 @@ public class PulsarDataStore implements DataStore {
 
         log.fine("Sending message to Pulsar.");
 
+        // TODO solve builder symbol not found compromising compilation
         producer.newMessage().value(DavisMessage.builder()
                 .uuid(prop.getProperty("sensor.uuid"))
                 .latitude(lat)
                 .longitude(lon)
                 .altitude(alt)
+                // TODO define all these
                 .ts("2021-09-29T12:00:22")
                 .temp_out((float) 18.5556)
                 .temp_in((float) 1.1)
@@ -163,6 +140,7 @@ public class PulsarDataStore implements DataStore {
         producer.close();
         client.close();
 
+        return false;
     }
 
     private ObjectMapper objectMapper() {

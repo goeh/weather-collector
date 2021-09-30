@@ -24,6 +24,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import se.technipelago.pulsar.PulsarDataStore;
 import se.technipelago.weather.archive.ArchivePage;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
@@ -31,6 +32,7 @@ import se.technipelago.weather.archive.DataStore;
 import se.technipelago.opensensor.OpenSensorDataStore;
 import se.technipelago.weather.archive.RemoteDataStore;
 import se.technipelago.weather.archive.SqlDataStore;
+import se.technipelago.pulsar.PulsarDataStore;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -111,6 +113,8 @@ public class DownloadController extends AbstractController {
             store = new RemoteDataStore(prop.getProperty("datastore.name") + ".");
         } else if("opensensor".equals(value)) {
             store = new OpenSensorDataStore();
+        } else if("pulsar".equals(value)) {
+            store = new PulsarDataStore();
         } else {
             store = new SqlDataStore();
         }

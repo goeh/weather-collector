@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -12,6 +15,11 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.pulsar.client.api.AuthenticationFactory;
+import org.apache.pulsar.client.api.Producer;
+import org.apache.pulsar.client.api.PulsarClient;
+import org.apache.pulsar.client.api.Schema;
+import org.apache.pulsar.client.api.schema.SchemaDefinition;
 import se.technipelago.opensensor.OpenSensorDataStore;
 import se.technipelago.opensensor.OpenSensorPayload;
 import se.technipelago.weather.archive.ArchiveRecord;
@@ -77,7 +85,30 @@ public class PulsarDataStore implements DataStore {
         return cal.getTime();
     }
 
-    // TODO edit!
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private static class DavisMessage {
+        String uuid;
+        float latitude;
+        float longitude;
+        float altitude;
+        String ts;
+        float temp_out;
+        float temp_in;
+        int hum_out;
+        int hum_in;
+        int barometer;
+        float rain;
+        float rain_rate;
+        float wind_avg;
+        int wind_dir;
+        float wind_high;
+        int solar;
+        float uv;
+    }
+
+    // TODO add return statement (boolean)
     @Override
     public boolean insertData(ArchiveRecord rec) throws IOException {
 
@@ -87,7 +118,50 @@ public class PulsarDataStore implements DataStore {
         String topic = prop.getProperty("pulsar.topic");
         String token = prop.getProperty("pulsar.token");
 
+        PulsarClient client = PulsarClient.builder()
+                .serviceUrl(service_url)
+                .authentication(
+                        AuthenticationFactory.token(token)
+                )
+                .build();
 
+        SchemaDefinition<DavisMessage> schemaDefinition = SchemaDefinition.<DavisMessage>builder()
+                .withPojo(DavisMessage.class)
+                .build();
+
+        Producer<DavisMessage> producer = client.newProducer(Schema.AVRO(schemaDefinition))
+                .topic(topic)
+                .create();
+
+        float lon = Float.parseFloat((prop.getProperty("sensor.longitude")));
+        float lat = Float.parseFloat((prop.getProperty("sensor.latitude")));
+        float alt = Float.parseFloat((prop.getProperty("sensor.altitude")));
+
+
+        log.fine("Sending message to Pulsar.");
+
+        producer.newMessage().value(DavisMessage.builder()
+                .uuid(prop.getProperty("sensor.uuid"))
+                .latitude(lat)
+                .longitude(lon)
+                .altitude(alt)
+                .ts("2021-09-29T12:00:22")
+                .temp_out((float) 18.5556)
+                .temp_in((float) 1.1)
+                .hum_out(80)
+                .hum_in(64)
+                .barometer(1001)
+                .rain((float) 1.1)
+                .rain_rate((float) 1.0)
+                .wind_avg((float) 2.2)
+                .wind_dir(90)
+                .wind_high((float) 3.0)
+                .solar(1)
+                .uv((float) 4.0)
+                .build()).send();
+
+        producer.close();
+        client.close();
 
     }
 
@@ -136,9 +210,7 @@ public class PulsarDataStore implements DataStore {
             Field field = rec.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             return field.get(rec);
-        } catch (NoSuchFieldException e) {
-            log.severe(e.getMessage());
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             log.severe(e.getMessage());
         }
         return null;

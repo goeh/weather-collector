@@ -2,16 +2,7 @@ package se.technipelago.pulsar;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.apache.pulsar.client.api.AuthenticationFactory;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.PulsarClient;
@@ -51,7 +42,7 @@ public class PulsarDataStore implements DataStore {
                 fis = new FileInputStream(file);
                 prop.load(fis);
             } else {
-                log.log(Level.WARNING, PROPERTIES_FILE + " not found, data will not be sent.");
+                log.log(Level.SEVERE, PROPERTIES_FILE + " not found, data will not be sent.");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -115,7 +106,6 @@ public class PulsarDataStore implements DataStore {
 
         log.fine("Sending message to Pulsar.");
 
-        // TODO solve builder symbol not found compromising compilation
         producer.newMessage().value(DavisMessage.builder()
                 .uuid(prop.getProperty("sensor.uuid"))
                 .latitude(lat)

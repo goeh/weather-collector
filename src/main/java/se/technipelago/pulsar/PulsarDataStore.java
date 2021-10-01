@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -99,32 +100,31 @@ public class PulsarDataStore implements DataStore {
                 .topic(topic)
                 .create();
 
+        final Timestamp timestamp = new Timestamp(rec.getTimestamp().getTime());
         float lon = Float.parseFloat((prop.getProperty("sensor.longitude")));
         float lat = Float.parseFloat((prop.getProperty("sensor.latitude")));
         float alt = Float.parseFloat((prop.getProperty("sensor.altitude")));
 
 
         log.fine("Sending message to Pulsar.");
-
         producer.newMessage().value(DavisMessage.builder()
                 .uuid(prop.getProperty("sensor.uuid"))
                 .latitude(lat)
                 .longitude(lon)
                 .altitude(alt)
-                // TODO define all these
-                .ts("2021-09-29T12:00:22")
-                .temp_out((float) 18.5556)
-                .temp_in((float) 1.1)
-                .hum_out(80)
-                .hum_in(64)
-                .barometer(1001)
-                .rain((float) 1.1)
-                .rain_rate((float) 1.0)
-                .wind_avg((float) 2.2)
-                .wind_dir(90)
-                .wind_high((float) 3.0)
-                .solar(1)
-                .uv((float) 4.0)
+                .ts(timestamp)
+                .temp_out((float) rec.getOutsideTemperature())
+                .temp_in((float) rec.getInsideTemperature())
+                .hum_out((short) rec.getOutsideHumidity())
+                .hum_in((short) rec.getInsideHumidity())
+                .barometer(rec.getBarometer())
+                .rain((float) rec.getRainFall())
+                .rain_rate((float) rec.getRainRateHigh())
+                .wind_avg((float) rec.getWindSpeedAvg())
+                .wind_dir((short) rec.getWindDirection())
+                .wind_high((float) rec.getWindSpeedHigh())
+                .solar((short) rec.getSolarRadiation())
+                .uv((float) rec.getUvIndex())
                 .build()).send();
 
         producer.close();

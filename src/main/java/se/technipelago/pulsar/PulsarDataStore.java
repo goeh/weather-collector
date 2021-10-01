@@ -13,7 +13,7 @@ import se.technipelago.opensensor.OpenSensorPayload;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.archive.DataStore;
-import se.technipelago.pulsar.DavisMessage;
+
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -100,7 +100,10 @@ public class PulsarDataStore implements DataStore {
                 .topic(topic)
                 .create();
 
-        final Timestamp timestamp = new Timestamp(rec.getTimestamp().getTime());
+        Timestamp timestamp = new Timestamp(rec.getTimestamp().getTime());
+        final String formattedtimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                                                .format(timestamp);
+
         float lon = Float.parseFloat((prop.getProperty("sensor.longitude")));
         float lat = Float.parseFloat((prop.getProperty("sensor.latitude")));
         float alt = Float.parseFloat((prop.getProperty("sensor.altitude")));
@@ -112,7 +115,7 @@ public class PulsarDataStore implements DataStore {
                 .latitude(lat)
                 .longitude(lon)
                 .altitude(alt)
-                .ts(timestamp)
+                .ts(formattedtimestamp)
                 .temp_out((float) rec.getOutsideTemperature())
                 .temp_in((float) rec.getInsideTemperature())
                 .hum_out((short) rec.getOutsideHumidity())
@@ -130,59 +133,58 @@ public class PulsarDataStore implements DataStore {
         producer.close();
         client.close();
 
-        return false;
+        return true;
     }
-
-    private ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        //objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        objectMapper.setDateFormat(dateFormat);
-        return objectMapper;
-    }
-
-    private List<String> getCollectorProbes(Properties prop) {
-        List<String> result = new ArrayList<>();
-        String line = prop.getProperty("collector.values");
-        if (line != null && line.trim().length() > 0) {
-            String[] values = line.split(",");
-            for (int i = 0; i < values.length; i++) {
-                result.add(values[i].trim());
-            }
-        }
-        return result;
-    }
-
-    private List<OpenSensorPayload> createPayload(ArchiveRecord rec, List<String> probes, Properties prop) {
-        List<OpenSensorPayload> result = new ArrayList<>();
-
-        for (String probe : probes) {
-            OpenSensorPayload payload = new OpenSensorPayload();
-            String sid = prop.getProperty("collector." + probe + ".sid");
-            if (sid == null) {
-                throw new IllegalArgumentException("Property collector." + probe + ".sid must be set");
-            }
-            payload.setSid(sid);
-            payload.addValue(rec.getTimestamp(), (Number) getFieldValue(rec, probe));
-            result.add(payload);
-        }
-
-        return result;
-    }
-
-    private Object getFieldValue(ArchiveRecord rec, String fieldName) {
-        try {
-            Field field = rec.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            return field.get(rec);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            log.severe(e.getMessage());
-        }
-        return null;
-    }
+//
+//    private ObjectMapper objectMapper() {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+//        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+//        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+//        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+//        objectMapper.setDateFormat(dateFormat);
+//        return objectMapper;
+//    }
+//
+//    private List<String> getCollectorProbes(Properties prop) {
+//        List<String> result = new ArrayList<>();
+//        String line = prop.getProperty("collector.values");
+//        if (line != null && line.trim().length() > 0) {
+//            String[] values = line.split(",");
+//            for (int i = 0; i < values.length; i++) {
+//                result.add(values[i].trim());
+//            }
+//        }
+//        return result;
+//    }
+//
+//    private List<OpenSensorPayload> createPayload(ArchiveRecord rec, List<String> probes, Properties prop) {
+//        List<OpenSensorPayload> result = new ArrayList<>();
+//
+//        for (String probe : probes) {
+//            OpenSensorPayload payload = new OpenSensorPayload();
+//            String sid = prop.getProperty("collector." + probe + ".sid");
+//            if (sid == null) {
+//                throw new IllegalArgumentException("Property collector." + probe + ".sid must be set");
+//            }
+//            payload.setSid(sid);
+//            payload.addValue(rec.getTimestamp(), (Number) getFieldValue(rec, probe));
+//            result.add(payload);
+//        }
+//
+//        return result;
+//    }
+//
+//    private Object getFieldValue(ArchiveRecord rec, String fieldName) {
+//        try {
+//            Field field = rec.getClass().getDeclaredField(fieldName);
+//            field.setAccessible(true);
+//            return field.get(rec);
+//        } catch (NoSuchFieldException | IllegalAccessException e) {
+//            log.severe(e.getMessage());
+//        }
+//        return null;
+//    }
 
     @Override
     public Date updateStatus(Date lastDownload, Date lastRecord) throws IOException {

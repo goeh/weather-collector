@@ -1,4 +1,4 @@
-package se.technipelago.pulsar;
+package nl.tudelft.davisstreaming;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

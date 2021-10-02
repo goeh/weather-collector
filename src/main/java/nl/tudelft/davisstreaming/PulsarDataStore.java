@@ -1,4 +1,4 @@
-package se.technipelago.pulsar;
+package nl.tudelft.davisstreaming;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -102,7 +102,7 @@ public class PulsarDataStore implements DataStore {
 
         Timestamp timestamp = new Timestamp(rec.getTimestamp().getTime());
         final String formattedtimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-                                                .format(timestamp);
+                .format(timestamp);
 
         float lon = Float.parseFloat((prop.getProperty("sensor.longitude")));
         float lat = Float.parseFloat((prop.getProperty("sensor.latitude")));
@@ -196,3 +196,4 @@ public class PulsarDataStore implements DataStore {
     }
 
 }
+

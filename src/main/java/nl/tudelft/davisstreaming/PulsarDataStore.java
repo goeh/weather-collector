@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -87,12 +88,9 @@ public class PulsarDataStore implements DataStore {
                 )
                 .build();
 
-//        SchemaDefinition<DavisMessage> schemaDefinition = SchemaDefinition.<DavisMessage>builder()
-//                .withPojo(DavisMessage.class)
-//                .build();
-
         Producer<DavisMessage> producer = client.newProducer(Schema.AVRO(DavisMessage.class))
                 .topic(topic)
+                .sendTimeout(10, TimeUnit.SECONDS)
                 .create();
 
         Timestamp timestamp = new Timestamp(rec.getTimestamp().getTime());
@@ -102,7 +100,6 @@ public class PulsarDataStore implements DataStore {
         float lon = Float.parseFloat((prop.getProperty("sensor.longitude")));
         float lat = Float.parseFloat((prop.getProperty("sensor.latitude")));
         float alt = Float.parseFloat((prop.getProperty("sensor.altitude")));
-
 
         log.fine("Sending message to Pulsar.");
         producer.newMessage().value(DavisMessage.builder()

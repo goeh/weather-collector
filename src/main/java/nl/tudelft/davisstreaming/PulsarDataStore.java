@@ -1,29 +1,23 @@
 package nl.tudelft.davisstreaming;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.pulsar.client.api.AuthenticationFactory;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.Schema;
-import org.apache.pulsar.client.api.schema.SchemaDefinition;
 import se.technipelago.opensensor.OpenSensorDataStore;
-import se.technipelago.opensensor.OpenSensorPayload;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.archive.DataStore;
-
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -87,16 +81,17 @@ public class PulsarDataStore implements DataStore {
 
         PulsarClient client = PulsarClient.builder()
                 .serviceUrl(service_url)
+                .tlsTrustCertsFilePath("/etc/ssl/certs/ca-certificates.crt")
                 .authentication(
                         AuthenticationFactory.token(token)
                 )
                 .build();
 
-        SchemaDefinition<DavisMessage> schemaDefinition = SchemaDefinition.<DavisMessage>builder()
-                .withPojo(DavisMessage.class)
-                .build();
+//        SchemaDefinition<DavisMessage> schemaDefinition = SchemaDefinition.<DavisMessage>builder()
+//                .withPojo(DavisMessage.class)
+//                .build();
 
-        Producer<DavisMessage> producer = client.newProducer(Schema.AVRO(schemaDefinition))
+        Producer<DavisMessage> producer = client.newProducer(Schema.AVRO(DavisMessage.class))
                 .topic(topic)
                 .create();
 
@@ -135,56 +130,6 @@ public class PulsarDataStore implements DataStore {
 
         return true;
     }
-//
-//    private ObjectMapper objectMapper() {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-//        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-//        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-//        objectMapper.setDateFormat(dateFormat);
-//        return objectMapper;
-//    }
-//
-//    private List<String> getCollectorProbes(Properties prop) {
-//        List<String> result = new ArrayList<>();
-//        String line = prop.getProperty("collector.values");
-//        if (line != null && line.trim().length() > 0) {
-//            String[] values = line.split(",");
-//            for (int i = 0; i < values.length; i++) {
-//                result.add(values[i].trim());
-//            }
-//        }
-//        return result;
-//    }
-//
-//    private List<OpenSensorPayload> createPayload(ArchiveRecord rec, List<String> probes, Properties prop) {
-//        List<OpenSensorPayload> result = new ArrayList<>();
-//
-//        for (String probe : probes) {
-//            OpenSensorPayload payload = new OpenSensorPayload();
-//            String sid = prop.getProperty("collector." + probe + ".sid");
-//            if (sid == null) {
-//                throw new IllegalArgumentException("Property collector." + probe + ".sid must be set");
-//            }
-//            payload.setSid(sid);
-//            payload.addValue(rec.getTimestamp(), (Number) getFieldValue(rec, probe));
-//            result.add(payload);
-//        }
-//
-//        return result;
-//    }
-//
-//    private Object getFieldValue(ArchiveRecord rec, String fieldName) {
-//        try {
-//            Field field = rec.getClass().getDeclaredField(fieldName);
-//            field.setAccessible(true);
-//            return field.get(rec);
-//        } catch (NoSuchFieldException | IllegalAccessException e) {
-//            log.severe(e.getMessage());
-//        }
-//        return null;
-//    }
 
     @Override
     public Date updateStatus(Date lastDownload, Date lastRecord) throws IOException {

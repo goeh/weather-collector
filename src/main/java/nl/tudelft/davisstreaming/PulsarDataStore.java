@@ -23,10 +23,12 @@ import java.util.logging.Logger;
 public class PulsarDataStore implements DataStore {
 
     private Connection conn;
+    private PulsarClient client;
+    private Producer<DavisMessage> producer;
     private PreparedStatement selectStatus;
     private PreparedStatement updateStatus;
     private PreparedStatement updateCurrent;
-//    private PreparedStatement selectData;
+
 
     private static final String PROPERTIES_FILE = "pulsar.properties";
 
@@ -56,6 +58,17 @@ public class PulsarDataStore implements DataStore {
         return prop;
     }
 
+    final Properties prop = getProperties();
+
+    final String service_url = prop.getProperty("pulsar.service_url");
+    final String topic = prop.getProperty("pulsar.topic");
+    final String token = prop.getProperty("pulsar.token");
+    final String uuid = prop.getProperty("sensor.uuid");
+
+    final float lon = Float.parseFloat((prop.getProperty("sensor.longitude")));
+    final float lat = Float.parseFloat((prop.getProperty("sensor.latitude")));
+    final float alt = Float.parseFloat((prop.getProperty("sensor.altitude")));
+
     @Override
     public void init() {
         if (conn == null) {
@@ -63,39 +76,51 @@ public class PulsarDataStore implements DataStore {
                 conn = DriverManager.getConnection("jdbc:h2:file:./statusDb");
                 createTables(); // TODO this is called every time.
             } catch (SQLException e) {
-                log.log(Level.SEVERE, "Cannot connect to database", e);
+                log.severe("Cannot connect to database");
                 throw new RuntimeException(e);
             }
             log.fine("SQL datastore initialized");
         }
-
-//        if (selectData == null) {
+        try {
+            selectStatus = conn.prepareStatement("SELECT last_rec FROM status");
+            updateStatus = conn.prepareStatement("UPDATE status SET last_dl = ?, last_rec = ?");
+        } catch (SQLException e) {
+            log.severe("Failed to prepare SQL statements");
+            throw new RuntimeException(e);
+        }
+        if (client == null) {
             try {
-                selectStatus = conn.prepareStatement("SELECT last_rec FROM status");
-//                selectData = conn.prepareStatement("SELECT COUNT(*) AS cnt FROM archive WHERE ts = ?");
-                updateStatus = conn.prepareStatement("UPDATE status SET last_dl = ?, last_rec = ?");
-            } catch (SQLException e) {
-                log.log(Level.SEVERE, "Failed to prepare SQL statements", e);
-                throw new RuntimeException(e);
+                client = PulsarClient.builder()
+                        .serviceUrl(service_url)
+                        .tlsTrustCertsFilePath("/etc/ssl/certs/ca-certificates.crt")
+                        .authentication(
+                                AuthenticationFactory.token(token)
+                        )
+                        .build();
+            } catch (PulsarClientException ex) {
+                ex.printStackTrace();
             }
-//        }
+        }
+        if (producer == null) {
+            try {
+                producer = client.newProducer(Schema.AVRO(DavisMessage.class))
+                        .producerName(uuid)
+                        .topic(topic)
+                        .sendTimeout(10, TimeUnit.SECONDS)
+                        .create();
+            } catch (PulsarClientException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void cleanup() {
-//        if (selectData != null) {
-//            try {
-//                selectData.close();
-//            } catch (SQLException ex) {
-//                log.log(Level.WARNING, "Exception while closing SELECT statement", ex);
-//            }
-//            selectData = null;
-//        }
         if (updateStatus != null) {
             try {
                 updateStatus.close();
             } catch (SQLException ex) {
-                log.log(Level.WARNING, "Exception while closing INSERT statement", ex);
+                log.warning("Exception while closing INSERT statement");
             }
             updateStatus = null;
         }
@@ -103,7 +128,7 @@ public class PulsarDataStore implements DataStore {
             try {
                 selectStatus.close();
             } catch (SQLException ex) {
-                log.log(Level.WARNING, "Exception while closing SELECT statement", ex);
+                log.warning("Exception while closing SELECT statement");
             }
             selectStatus = null;
         }
@@ -111,7 +136,7 @@ public class PulsarDataStore implements DataStore {
             try {
                 updateCurrent.close();
             } catch (SQLException ex) {
-                log.log(Level.WARNING, "Exception while closing UPDATE statement", ex);
+                log.warning("Exception while closing UPDATE statement");
             }
             updateCurrent = null;
         }
@@ -119,9 +144,23 @@ public class PulsarDataStore implements DataStore {
             try {
                 conn.close();
             } catch (SQLException ex) {
-                log.log(Level.SEVERE, "Cannot close database connection", ex);
+                log.severe("Cannot close database connection");
             }
             conn = null;
+        }
+        if (producer != null) {
+            try {
+                producer.close();
+            } catch (PulsarClientException ex) {
+                log.warning("Exception while closing Pulsar producer");
+            }
+        }
+        if (client != null) {
+            try {
+                client.close();
+            } catch (PulsarClientException ex) {
+                log.warning("Exception while closing Pulsar client");
+            }
         }
     }
 
@@ -144,46 +183,15 @@ public class PulsarDataStore implements DataStore {
 
     @Override
     public boolean insertData(ArchiveRecord rec) throws IOException {
-        final Properties prop = getProperties();
 
-        String service_url = prop.getProperty("pulsar.service_url");
-        String topic = prop.getProperty("pulsar.topic");
-        String token = prop.getProperty("pulsar.token");
-
+        log.fine("Sending message to Pulsar.");
         Timestamp timestamp = new Timestamp(rec.getTimestamp().getTime());
-        try {
-//            selectData.setTimestamp(1, timestamp);
-//            ResultSet duplicate = selectData.executeQuery();
-//            if (duplicate.next()) {
-//                int count = duplicate.getInt("cnt");
-//                if (count > 0) {
-//                    return false;
-//                }
-//            }
 
-            PulsarClient client = PulsarClient.builder()
-                    .serviceUrl(service_url)
-                    .tlsTrustCertsFilePath("/etc/ssl/certs/ca-certificates.crt")
-                    .authentication(
-                            AuthenticationFactory.token(token)
-                    )
-                    .build();
+        final String formattedtimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                .format(timestamp);
 
-            Producer<DavisMessage> producer = client.newProducer(Schema.AVRO(DavisMessage.class))
-                    .topic(topic)
-                    .sendTimeout(10, TimeUnit.SECONDS)
-                    .create();
-
-            final String formattedtimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-                    .format(timestamp);
-
-            float lon = Float.parseFloat((prop.getProperty("sensor.longitude")));
-            float lat = Float.parseFloat((prop.getProperty("sensor.latitude")));
-            float alt = Float.parseFloat((prop.getProperty("sensor.altitude")));
-
-            log.fine("Sending message to Pulsar.");
-            producer.newMessage().value(DavisMessage.builder()
-                    .uuid(prop.getProperty("sensor.uuid"))
+        producer.newMessage().value(DavisMessage.builder()
+                    .uuid(uuid)
                     .latitude(lat)
                     .longitude(lon)
                     .altitude(alt)
@@ -202,14 +210,11 @@ public class PulsarDataStore implements DataStore {
                     .uv((float) rec.getUvIndex())
                     .build()).send();
 
-            producer.close();
-            client.close();
+//        producer.close();
+//        client.close();
 
-        } catch (PulsarClientException e) {
-            throw new IOException(e);
-        }
         return true;
-    }
+        }
 
     public Date insertStatus(Date lastDownload, Date lastRecord) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("INSERT INTO status (last_dl, last_rec) VALUES (?, ?)");

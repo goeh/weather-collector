@@ -83,7 +83,7 @@ program. You can also put `collector.properties` anywhere on the Java classpath.
 
     datastore.type=jdbc
     datastore.jdbc.class=se.technipelago.weather.datastore.sql.SqlDataStore
-    datastore.name=weather
+    datastore.jdbc.name=weather
     datastore.jdbc.driver=com.mysql.jdbc.Driver
     datastore.jdbc.url=jdbc:mysql://localhost:3306/weather?user=weather&password=weather
 
@@ -91,6 +91,25 @@ program. You can also put `collector.properties` anywhere on the Java classpath.
 
     datastore.type=dummy
     datastore.dummy.class=se.technipelago.weather.datastore.DummyDataStore
+
+#### Multiple data stores
+
+To store data in more than one data store, set `datastore.type` to a comma separated string and configure each data
+store with `datastore.xxx` prefix.
+
+    datastore.type=db,ds1,ds2
+
+    datastore.db.class=se.technipelago.weather.datastore.sql.SqlDataStore
+    datastore.db.name=weather
+    datastore.db.driver=com.mysql.jdbc.Driver
+    datastore.db.url=jdbc:mysql://localhost:3306/weather?user=weather&password=weather
+
+    datastore.ds1.class=se.technipelago.weather.datastore.DummyDataStore
+
+    datastore.ds2.class=se.technipelago.weather.datastore.remote.RemoteDataStore
+    datastore.ds2.url=https://api.some.domain/weather/upload
+    datastore.ds2.client.key=some-value
+    datastore.ds2.client.secret=some-secret-value
 
 ### Sample collector-logging.properties
 

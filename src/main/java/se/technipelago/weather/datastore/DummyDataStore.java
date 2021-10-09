@@ -22,7 +22,6 @@ public class DummyDataStore implements DataStore {
 
     @Override
     public void init(Properties prop) {
-        log.info(getClass().getName() + " initialized");
     }
 
     @Override

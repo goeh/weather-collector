@@ -76,7 +76,6 @@ To make it easier to start the collector from `cron` or from the command line, c
     SERIAL_PORT=/dev/ttyUSB0
     SERIAL_BAUD=19200
     
-    export WEATHER_COLLECTOR_OPTS="-Djava.util.logging.config.file=$COLLECTOR_HOME/collector-logging.properties"
     cd $COLLECTOR_HOME
     bin/weather-collector $SERIAL_PORT $SERIAL_BAUD
 
@@ -117,31 +116,54 @@ store with `datastore.xxx` prefix.
     datastore.ds2.client.key=some-value
     datastore.ds2.client.secret=some-secret-value
 
-### Sample collector-logging.properties
+### Logging
+
+Log4j2 is used for logging. See [logging.apache.org](https://logging.apache.org) for configuration options.
 
 Full debug logging to the console can be great the first time you run the program, to see that things works ok. Later
 you can configure a file logger with reduced logging in production.
 
-Put `collector-logging.properties` in the `weather-collector-VERSION` directory.
-
 Log to console (debug logging)
 
-    handlers = java.util.logging.ConsoleHandler
-
-    java.util.logging.ConsoleHandler.level = INFO
-    java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter
-    java.util.logging.SimpleFormatter.format=%1$tb %1$td, %1$tY %1$tl:%1$tM:%1$tS %1$Tp %2$s %4$s: %5$s%n
-
-    se.technipelago.level = ALL
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration status="WARN">
+        <appenders>
+            <console name="Console" target="SYSTEM_OUT">
+                <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            </console>
+        </appenders>
+        <loggers>
+            <logger name="se.technipelago" level="DEBUG" additivity="false">
+                <AppenderRef ref="Console"/>
+            </logger>
+            <root level="ERROR">
+                <AppenderRef ref="Console"/>
+            </root>
+        </loggers>
+    </configuration>
 
 Log to file (production logging)
 
-    handlers = java.util.logging.FileHandler
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration status="WARN">
+        <appenders>
+            <appender name="FILE" class="org.apache.log4j.FileAppender">
+            
+               <param name="file" value="/var/log/weather-collector.log"/>
+               <param name="immediateFlush" value="true"/>
+               <param name="threshold" value="debug"/>
+               <param name="append" value="false"/>
+            
+               <layout class="org.apache.log4j.PatternLayout">
+                  <param name="conversionPattern" value="%m%n"/>
+               </layout>
+            </appender>
+        </appenders>
     
-    java.util.logging.FileHandler.level = INFO
-    java.util.logging.FileHandler.pattern = collector.log
-    java.util.logging.FileHandler.limit = 100000
-    java.util.logging.FileHandler.count = 5
-    java.util.logging.FileHandler.append= true
-    java.util.logging.FileHandler.formatter = java.util.logging.SimpleFormatter
-    java.util.logging.SimpleFormatter.format=%1$tb %1$td, %1$tY %1$tl:%1$tM:%1$tS %1$Tp %2$s %4$s: %5$s%n
+        <loggers>   
+            <logger name="log4j.rootLogger" additivity="false">
+               <level value="INFO"/>
+               <appender-ref ref="FILE"/>
+            </logger>
+        </loggers>
+    </configuration>

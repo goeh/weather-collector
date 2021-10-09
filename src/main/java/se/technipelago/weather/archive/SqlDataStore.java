@@ -285,9 +285,9 @@ public class SqlDataStore implements DataStore {
         try {
             stmt = conn.createStatement();
             if (!tablesFound.contains("archive")) {
-                stmt.executeUpdate("CREATE TABLE archive ("
-                        + "id int IDENTITY,"
-                        + "ts datetime NOT NULL," /* UNIQUE */
+                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS archive ("
+                        + "id int NOT NULL AUTO_INCREMENT,"
+                        + "ts datetime NOT NULL,"
                         + "temp_out float NULL,"
                         + "temp_in float NULL,"
                         + "hum_out smallint NULL,"
@@ -299,11 +299,12 @@ public class SqlDataStore implements DataStore {
                         + "wind_dir smallint NULL,"
                         + "wind_high float NULL,"
                         + "solar smallint NULL,"
-                        + "uv float NULL)");
+                        + "uv float NULL,"
+                        + "PRIMARY KEY (id));");
             }
             if (!tablesFound.contains("current")) {
-                stmt.executeUpdate("CREATE TABLE current ("
-                        + "id int IDENTITY,"
+                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS current ("
+                        + "id int AUTO_INCREMENT,"
                         + "bar_trend smallint NULL,"
                         + "console_battery float NULL,"
                         + "forecast_icons varchar(28) NULL,"
@@ -311,13 +312,15 @@ public class SqlDataStore implements DataStore {
                         + "sunrise datetime NULL,"
                         + "sunset datetime NULL,"
                         + "ts datetime NOT NULL,"
-                        + "transmit_battery smallint NULL)");
+                        + "transmit_battery smallint NULL,"
+                        + "PRIMARY KEY (id));");
             }
             if (!tablesFound.contains("status")) {
-                stmt.executeUpdate("CREATE TABLE status ("
-                        + "id int IDENTITY,"
+                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS status ("
+                        + "id int AUTO_INCREMENT,"
                         + "last_dl datetime NOT NULL,"
-                        + "last_rec datetime NOT NULL)");
+                        + "last_rec datetime NOT NULL,"
+                        + "PRIMARY KEY (id));");
             }
         } finally {
             stmt.close();

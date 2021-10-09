@@ -87,8 +87,8 @@ public class ArchiveRecord {
         return barometer;
     }
 
-    public void setBarometer(int barobeter) {
-        this.barometer = barobeter;
+    public void setBarometer(int barometer) {
+        this.barometer = barometer;
     }
 
     public double getOutsideTemperatureHigh() {

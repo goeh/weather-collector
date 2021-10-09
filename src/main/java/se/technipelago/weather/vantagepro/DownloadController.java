@@ -66,15 +66,6 @@ public class DownloadController extends AbstractDavisController {
         initDataStores(WeatherUtils.loadProperties(COLLECTOR_PROPERTIES));
     }
 
-    public void cleanup() {
-        try {
-            writeString("QUIT\n");
-        } catch (IOException ex) {
-            log.log(Level.SEVERE, "Cannot stop the receiver thread", ex);
-        }
-        super.cleanup();
-    }
-
     public void execute() throws IOException {
         byte[] buf;
 
@@ -181,7 +172,7 @@ public class DownloadController extends AbstractDavisController {
             try {
                 store.updateCurrent(current);
             } catch (IOException ex) {
-                log.log(Level.SEVERE, "Failed to update datastore", ex);
+                log.log(Level.SEVERE, "Failed to update data store", ex);
             }
         });
     }

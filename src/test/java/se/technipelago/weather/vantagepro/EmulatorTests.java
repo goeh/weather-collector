@@ -3,6 +3,8 @@ package se.technipelago.weather.vantagepro;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import se.technipelago.weather.Controller;
+import se.technipelago.weather.emulator.EmulatorDownloadController;
 import se.technipelago.weather.emulator.Server;
 
 public class EmulatorTests {
@@ -36,7 +38,7 @@ public class EmulatorTests {
 
     @Test
     public void downloadFromEmulator() {
-        DownloadController ctrl = new DownloadController();
+        Controller ctrl = new EmulatorDownloadController();
         ctrl.start(new String[]{"localhost", String.valueOf(server.getPort())});
     }
 }

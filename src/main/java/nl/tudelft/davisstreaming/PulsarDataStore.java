@@ -54,7 +54,7 @@ public class PulsarDataStore implements DataStore {
                 log.severe("Cannot connect to database");
                 throw new RuntimeException(e);
             }
-            log.fine("SQL datastore initialized");
+            log.fine("SQL data store initialized");
         }
         try {
             selectStatus = conn.prepareStatement("SELECT last_rec FROM status");

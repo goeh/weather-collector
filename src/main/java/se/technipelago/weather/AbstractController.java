@@ -29,6 +29,7 @@ public abstract class AbstractController implements Controller {
 
         final String statusType = prop.getProperty("datastore.status");
         setStatusDataStore(StringUtils.isEmpty(statusType) ? types.get(0) : statusType);
+        log.fine("Data store " + statusDataStore + " will be used to store download status");
     }
 
     protected DataStore initDataStore(String type, Properties prop) {
@@ -40,19 +41,19 @@ public abstract class AbstractController implements Controller {
 
         final DataStore dataStore = createDataStore(className);
         dataStore.init(getDataStoreProperties(type, prop));
-        log.info("Datastore " + type + " [" + className + "] initialized");
+        log.info("Data store " + type + " (" + className + ") initialized");
         return dataStore;
     }
 
     protected DataStore createDataStore(String className) {
         try {
-            final Class clazz = Class.forName(className);
+            final Class<?> clazz = Class.forName(className);
             if (!DataStore.class.isAssignableFrom(clazz)) {
                 throw new IllegalArgumentException(clazz.getName() + " must implement " + DataStore.class.getName());
             }
             return (DataStore) clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create datastore " + className, e);
+            throw new RuntimeException("Failed to create data store " + className, e);
         }
     }
 
@@ -116,7 +117,7 @@ public abstract class AbstractController implements Controller {
             try {
                 store.cleanup();
             } catch (Exception e) {
-                log.log(Level.SEVERE, "Failed to cleanup datastore " + store.getClass().getName(), e);
+                log.log(Level.SEVERE, "Failed to cleanup data store " + store.getClass().getName(), e);
             }
         });
     }

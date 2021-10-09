@@ -23,6 +23,7 @@ import se.technipelago.weather.emulator.ServerCommand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 /**
  * Davis Vantage Pro 2 Emulator.
@@ -30,6 +31,8 @@ import java.net.Socket;
  * @author Goran Ehrsson <goran@technipelago.se>
  */
 public class VantagePro2Emulator implements Emulator {
+
+    private static final Logger log = Logger.getLogger(VantagePro2Emulator.class.getName());
 
     private static final int BUF_LENGTH = 256;
     private byte[] inputBuffer = new byte[BUF_LENGTH];
@@ -58,7 +61,7 @@ public class VantagePro2Emulator implements Emulator {
                 if(input != null) {
                     Command cmd = getCommand(input);
                     if (cmd != null) {
-                        System.out.println("Executing " + cmd.getClass().getName());
+                        log.fine("Executing " + cmd.getClass().getName());
                         cmd.execute(connection);
                     } else {
                         connection.getOutputStream().write("ERROR\n\r".getBytes());

@@ -39,11 +39,17 @@ Suggest taking a look at [sdkman](https://sdkman.io/) to easily manage different
 
     ./gradlew
 
-When the build finish successfully, you will find `weather-collector.zip` in ./build/distributions.
-Extract the archive where you want to install the program, for example in /home/pi/weather.
-Then go to the folder where you extracted the archive and start the weather collector.
+When the build finish successfully, you will find `weather-collector.zip` in ./build/distributions. Extract the archive
+where you want to install the program, for example in /home/pi/weather. Then go to the folder where you extracted the
+archive and start the weather collector.
 
 ## Run
+
+### Run from source
+
+    ./gradlew run --args='/dev/ttyUSB0 19200'
+
+### Run from distribution
 
     cd weather-collector-VERSION
     ./bin/weather-collector /dev/ttyUSB0 19200

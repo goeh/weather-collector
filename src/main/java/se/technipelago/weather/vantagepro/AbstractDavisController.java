@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -52,7 +53,7 @@ public abstract class AbstractDavisController extends AbstractController {
         try {
             String host = args.length > 0 ? args[0] : "localhost";
             int port = args.length > 1 ? Integer.parseInt(args[1]) : 8888;
-
+            log.fine("Downloading weather data from " + host + ":" + port);
             connection = new Socket(host, port);
             connection.setSoTimeout(5000);
             in = connection.getInputStream();
@@ -63,21 +64,21 @@ public abstract class AbstractDavisController extends AbstractController {
                 try {
                     out.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    log.log(Level.WARNING, "Failed to close connection", ex);
                 }
             }
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    log.log(Level.WARNING, "Failed to close connection", ex);
                 }
             }
             if (connection != null) {
                 try {
                     connection.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    log.log(Level.WARNING, "Failed to close connection", ex);
                 }
             }
         }
@@ -88,7 +89,7 @@ public abstract class AbstractDavisController extends AbstractController {
         int baud = args.length > 1 ? Integer.parseInt(args[1]) : 19200;
         SerialPort serialPort = new SerialPort(portName);
         RingBuffer buffer = new RingBuffer();
-
+        log.fine("Downloading weather data from " + portName);
         try {
             serialPort.openPort();
             serialPort.setParams(baud, 8, 1, 0);
@@ -99,20 +100,20 @@ public abstract class AbstractDavisController extends AbstractController {
             run();
             //serialPort.closePort();
         } catch (SerialPortException ex) {
-            System.out.println(ex);
+            log.log(Level.SEVERE, "Failed to initialize serial connection", ex);
         } finally {
             if (out != null) {
                 try {
                     out.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    log.log(Level.WARNING, "Failed to close connection", ex);
                 }
             }
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    log.log(Level.WARNING, "Failed to close connection", ex);
                 }
             }
         }

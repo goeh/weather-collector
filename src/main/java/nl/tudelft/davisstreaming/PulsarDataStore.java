@@ -28,7 +28,7 @@ public class PulsarDataStore implements DataStore {
     private PreparedStatement updateCurrent;
 
 
-    private static final String PROPERTIES_FILE = "pulsar.properties";
+    private static final String PROPERTIES_FILE = "collector.properties";
 
     private static final Logger log = Logger.getLogger(PulsarDataStore.class.getName());
 
@@ -184,9 +184,6 @@ public class PulsarDataStore implements DataStore {
                 .solar((short) rec.getSolarRadiation())
                 .uv((float) rec.getUvIndex())
                 .build()).send();
-
-//        producer.close();
-//        client.close();
 
         return true;
     }

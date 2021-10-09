@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
-//TODO understand why it can't be static
-
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

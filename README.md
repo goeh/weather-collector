@@ -77,7 +77,7 @@ To make it easier to start the collector from `cron` or from the command line, c
 ### Sample collector.properties
 
 Put `collector.properties` in the `weather-collector-VERSION` directory and `cd` to that directory before you start the
-program.
+program. You can also put `collector.properties` anywhere on the Java classpath.
 
 #### MySQL storage
 

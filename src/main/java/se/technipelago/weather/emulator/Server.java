@@ -16,30 +16,43 @@
  */
 package se.technipelago.weather.emulator;
 
-import se.technipelago.weather.emulator.vantagepro.VantagePro2;
+import se.technipelago.weather.emulator.vantagepro.VantagePro2Emulator;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.logging.Logger;
 
 /**
  * Weather station emulator server.
- * 
+ *
  * @author Goran Ehrsson <goran@technipelago.se>
  */
 public class Server {
 
+    private static final Logger log = Logger.getLogger(Server.class.getName());
+
     private static boolean keepRunning = true;
+    private int port;
 
     /**
      * This is the entry point of the emulator server.
      * The server listens for connections and creates a new emulator instance
      * for each connection. Each emulator instance runs in it's own thread.
-     * 
+     *
      * @param args command line arguments args[0] is the TCP port number to listen to
      */
     public static void main(String[] args) {
-        int port = args.length > 0 ? Integer.parseInt(args[0]) : 8888;
+        final Server server = new Server();
+        server.start(args.length > 0 ? Integer.parseInt(args[0]) : 8888);
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void start(int port) {
         ServerSocket socket;
         try {
             socket = new ServerSocket(port);
@@ -48,7 +61,9 @@ public class Server {
             throw new RuntimeException("Error initializing simulator", e);
         }
 
-        System.out.println("Emulator Server listening on port " + port);
+        this.port = socket.getLocalPort();
+
+        log.info("Emulator Server listening on port " + this.port);
 
         while (keepRunning) {
             try {
@@ -60,7 +75,7 @@ public class Server {
                     connection.close();
                 }
             } catch (SocketTimeoutException e) {
-            // Ignore.
+                // Ignore.
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -71,6 +86,7 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        log.info("Emulator Server stopped");
     }
 
     /*
@@ -78,9 +94,9 @@ public class Server {
      * TODO move hard coded class to configuration.
      */
     private static Emulator getEmulator(Socket connection) {
-        return new VantagePro2(connection);
+        return new VantagePro2Emulator(connection);
     }
-    
+
     /**
      * Shutdown the emulator server.
      */

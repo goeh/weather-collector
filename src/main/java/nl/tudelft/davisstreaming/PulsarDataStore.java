@@ -3,7 +3,7 @@ package nl.tudelft.davisstreaming;
 import org.apache.pulsar.client.api.*;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
-import se.technipelago.weather.archive.DataStore;
+import se.technipelago.weather.datastore.DataStore;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,7 +70,7 @@ public class PulsarDataStore implements DataStore {
     final float alt = Float.parseFloat((prop.getProperty("sensor.altitude")));
 
     @Override
-    public void init() {
+    public void init(Properties prop) {
         if (conn == null) {
             try {
                 conn = DriverManager.getConnection("jdbc:h2:file:./statusDb");

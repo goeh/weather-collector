@@ -17,25 +17,26 @@
 package se.technipelago.weather.emulator.vantagepro;
 
 import se.technipelago.weather.emulator.Command;
-import se.technipelago.weather.emulator.ServerCommand;
 import se.technipelago.weather.emulator.Emulator;
+import se.technipelago.weather.emulator.ServerCommand;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
 /**
  * Davis Vantage Pro 2 Emulator.
- * 
+ *
  * @author Goran Ehrsson <goran@technipelago.se>
  */
-public class VantagePro2 implements Emulator {
+public class VantagePro2Emulator implements Emulator {
 
     private static final int BUF_LENGTH = 256;
     private byte[] inputBuffer = new byte[BUF_LENGTH];
     private boolean keepReading = true;
     private Socket connection;
 
-    public VantagePro2(Socket connection) {
+    public VantagePro2Emulator(Socket connection) {
         this.connection = connection;
     }
 
@@ -103,11 +104,11 @@ public class VantagePro2 implements Emulator {
             inputBuffer[idx++] = (byte) character;
         }
 
-        
+
         if (character == -1) { // EOF
             return null;
         }
-        
+
         /*
          * Remove trailing CR/NL
          */
@@ -129,7 +130,7 @@ public class VantagePro2 implements Emulator {
 
     /**
      * Returns a command instance ready to perform the specified action.
-     * 
+     *
      * @param input the client command line and optional arguments.
      * @return a command instance representing the client command given.
      */
@@ -185,7 +186,7 @@ public class VantagePro2 implements Emulator {
     /**
      * Compare a String and a byte array. If the byte array starts with the
      * same bytes as the string, true is returned.
-     * 
+     *
      * @param input the bytes to compare.
      * @param compare the bytes must match this reference string.
      * @return true if the byte array starts with the same bytes as the string
@@ -196,7 +197,7 @@ public class VantagePro2 implements Emulator {
 
     /**
      * Compare two byte arrays.
-     * 
+     *
      * @param input the bytes to compare.
      * @param compare the reference byte array.
      * @return true if <code>input</code> starts with the same bytes as <code>compare</code>.

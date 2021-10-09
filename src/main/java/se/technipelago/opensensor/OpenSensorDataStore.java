@@ -27,7 +27,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
-import se.technipelago.weather.archive.DataStore;
+import se.technipelago.weather.datastore.DataStore;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,12 +37,7 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,7 +75,7 @@ public class OpenSensorDataStore implements DataStore {
     }
 
     @Override
-    public void init() {
+    public void init(Properties prop) {
         log.fine("Open Sensor datastore initialized");
     }
 

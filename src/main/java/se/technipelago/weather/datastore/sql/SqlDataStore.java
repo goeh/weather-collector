@@ -14,19 +14,17 @@
  *  limitations under the License.
  *  under the License.
  */
-package se.technipelago.weather.archive;
+package se.technipelago.weather.datastore.sql;
+
+import se.technipelago.weather.archive.ArchiveRecord;
+import se.technipelago.weather.archive.CurrentRecord;
+import se.technipelago.weather.datastore.DataStore;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -35,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * A data persistence implementation that sore data in a SQL database.
  *
  * @author Goran Ehrsson <goran@technipelago.se>
  */
@@ -73,10 +72,9 @@ public class SqlDataStore implements DataStore {
         return prop;
     }
 
-    public void init() {
+    public void init(Properties prop) {
         if (conn == null) {
             try {
-                final Properties prop = getProperties();
                 Class.forName(prop.getProperty("datastore.jdbc.driver", "org.h2.Driver"));
                 conn = DriverManager.getConnection(prop.getProperty("datastore.jdbc.url", "jdbc:h2:file:./weatherDb"));
                 createTables();

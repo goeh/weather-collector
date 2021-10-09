@@ -9,8 +9,8 @@ group 'se.technipelago'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-def version = '1.5.0-SNAPSHOT'
-mainClassName = "se.technipelago.weather.vantagepro.DownloadController"
+version = '1.5.0-SNAPSHOT'
+mainClassName = "se.technipelago.weather.Downloader"
 
 defaultTasks 'clean', 'distZip'
 
@@ -29,11 +29,12 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.5'
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'io.github.java-native:jssc:2.9.4'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
     runtimeOnly 'mysql:mysql-connector-java:8.0.25'
     runtimeOnly 'com.h2database:h2:1.4.200'
-    implementation 'org.apache.pulsar:pulsar-client:2.8.0'
+    compileOnly 'org.apache.pulsar:pulsar-client:2.8.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.14.1'
     implementation 'org.slf4j:slf4j-simple:1.7.32'
 
@@ -45,4 +46,8 @@ dependencies {
 
 tasks.withType(JavaCompile) {
     options.annotationProcessorPath = configurations.apt
+}
+
+test {
+    useJUnitPlatform()
 }

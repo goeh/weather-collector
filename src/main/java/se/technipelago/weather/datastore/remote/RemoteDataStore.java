@@ -1,5 +1,6 @@
-package se.technipelago.weather.archive;
+package se.technipelago.weather.datastore.remote;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -8,18 +9,17 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import se.technipelago.weather.archive.ArchiveRecord;
+import se.technipelago.weather.archive.CurrentRecord;
+import se.technipelago.weather.datastore.DataStore;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -31,38 +31,33 @@ public class RemoteDataStore implements DataStore {
 
     protected final Logger log = Logger.getLogger(getClass().getName());
 
+    private String url;
+    private String clientKey;
+    private String clientSecret;
+
     private String name;
 
     public RemoteDataStore(String name) {
         this.name = name;
     }
 
-    private Properties getProperties() {
-        final Properties prop = new Properties();
-        InputStream fis = null;
-        try {
-            File file = new File(PROPERTIES_FILE);
-            if (file.exists()) {
-                fis = new FileInputStream(file);
-                prop.load(fis);
-            } else {
-                log.log(Level.WARNING, PROPERTIES_FILE + " not found, data will not be pushed to remote service.");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException ignore) {
-                }
-            }
+    @Override
+    public void init(Properties prop) {
+        url = prop.getProperty("url");
+        if (StringUtils.isEmpty(url)) {
+            log.severe("Property 'url' must be set");
+            return;
         }
-        return prop;
-    }
-
-    public void init() {
-        log.fine("Remote datastore [" + name + "] initialized");
+        clientKey = prop.getProperty("client.key");
+        if (StringUtils.isEmpty(clientKey)) {
+            log.severe("Property 'client.key' must be set");
+            return;
+        }
+        clientSecret = prop.getProperty("client.secret");
+        if (StringUtils.isEmpty(clientSecret)) {
+            log.severe("Property 'client.secret' must be set");
+            return;
+        }
     }
 
     public void cleanup() {
@@ -80,8 +75,6 @@ public class RemoteDataStore implements DataStore {
 
     public boolean insertData(ArchiveRecord rec) throws IOException {
 
-        final Properties prop = getProperties();
-        String url = prop.getProperty("datastore.remote.url");
         if (url == null || url.trim().length() == 0) {
             log.fine("No REST service configured");
             return false;
@@ -92,8 +85,6 @@ public class RemoteDataStore implements DataStore {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         String timestamp = dateFormat.format(rec.getTimestamp());
         StringBuilder buf = new StringBuilder();
-        String clientKey = prop.getProperty("datastore.remote.client.key");
-        String clientSecret = prop.getProperty("datastore.remote.client.secret");
         buf.append("{\n");
         buf.append("  \"clientKey\": \"" + clientKey + "\",\n");
         buf.append("  \"clientSecret\": \"" + clientSecret + "\",\n");
@@ -180,8 +171,6 @@ public class RemoteDataStore implements DataStore {
 
     public void updateCurrent(CurrentRecord rec) throws IOException {
 
-        final Properties prop = getProperties();
-        String url = prop.getProperty("datastore.remote.url");
         if (url == null || url.trim().length() == 0) {
             log.fine("No REST service configured");
             return;
@@ -192,8 +181,6 @@ public class RemoteDataStore implements DataStore {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         String timestamp = dateFormat.format(rec.getTimestamp());
         StringBuilder buf = new StringBuilder();
-        String clientKey = prop.getProperty("datastore.remote.client.key");
-        String clientSecret = prop.getProperty("datastore.remote.client.secret");
         buf.append("{\n");
         buf.append("  \"clientKey\": \"" + clientKey + "\",\n");
         buf.append("  \"clientSecret\": \"" + clientSecret + "\",\n");

@@ -4,11 +4,9 @@ import org.junit.jupiter.api.Test;
 import se.technipelago.weather.archive.ArchiveRecord;
 
 import java.util.Date;
+import java.util.Properties;
 
-/**
- * Created by goran on 2016-02-14.
- */
-public class DataStoreTests {
+public class OpenSensorTests {
 
     @Test
     public void testPayload() throws Exception {
@@ -29,7 +27,7 @@ public class DataStoreTests {
 
         OpenSensorDataStore ds = new OpenSensorDataStore();
 
-        ds.init();
+        ds.init(new Properties());
         ds.insertData(rec);
         ds.cleanup();
     }

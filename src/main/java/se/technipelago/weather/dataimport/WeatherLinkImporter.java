@@ -16,9 +16,11 @@
  */
 package se.technipelago.weather.dataimport;
 
+import se.technipelago.weather.AbstractController;
+import se.technipelago.weather.WeatherUtils;
 import se.technipelago.weather.archive.ArchiveRecord;
-import se.technipelago.weather.archive.SqlDataStore;
 import se.technipelago.weather.vantagepro.VantageUtil;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,58 +37,63 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
  * @author Goran Ehrsson <goran@technipelago.se>
  */
-public class WeatherLinkImporter {
+public class WeatherLinkImporter extends AbstractController {
+
+    private static final String PROPERTIES = "weatherlink.properties";
 
     private static final Pattern FILE_PATTERN = Pattern.compile("([12][09][\\d][\\d]\\-[01][\\d])\\.[wW][lL][kK]$");
     private static final DateFormat FILE_DATE = new SimpleDateFormat("yyyy-MM");
-    private SqlDataStore store = new SqlDataStore();
 
     public static void main(String[] args) {
+        final WeatherLinkImporter imp = new WeatherLinkImporter();
+        imp.start(args);
+    }
+
+    @Override
+    public void start(String[] args) {
         if (args.length == 0) {
             throw new IllegalArgumentException("usage: java " + WeatherLinkImporter.class.getName() + " directory");
         }
-        WeatherLinkImporter imp = new WeatherLinkImporter();
-        imp.startImport(new File(args[0]));
+        final WeatherLinkImporter imp = new WeatherLinkImporter();
+        imp.init(WeatherUtils.loadProperties(PROPERTIES));
+        try {
+            imp.startImport(new File(args[0]));
+        } finally {
+            imp.cleanup();
+        }
     }
 
     public void startImport(final File directory) {
-        try {
-            store.init();
-
-            for (File file : directory.listFiles()) {
-                DataInputStream in = null;
-                try {
-                    String filename = file.getName();
-                    Matcher m = FILE_PATTERN.matcher(filename);
-                    if (m.find()) {
-                        Date filedate = FILE_DATE.parse(m.group(1));
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(filedate);
-                        in = new DataInputStream(new FileInputStream(file));
-                        System.out.println("Importing " + filename);
-                        importMonth(in, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH));
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    System.err.println("Invalid file name: " + e.getMessage());
-                } finally {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException ex) {
-                            Logger.getLogger(WeatherLinkImporter.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+        for (File file : directory.listFiles()) {
+            DataInputStream in = null;
+            try {
+                String filename = file.getName();
+                Matcher m = FILE_PATTERN.matcher(filename);
+                if (m.find()) {
+                    Date filedate = FILE_DATE.parse(m.group(1));
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(filedate);
+                    in = new DataInputStream(new FileInputStream(file));
+                    System.out.println("Importing " + filename);
+                    importMonth(in, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                System.err.println("Invalid file name: " + e.getMessage());
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(WeatherLinkImporter.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
-        } finally {
-            store.cleanup();
         }
     }
 
@@ -240,7 +247,7 @@ public class WeatherLinkImporter {
         archive.setSolarRadiation(solar);
         archive.setUvIndex(uv);
 
-        store.insertData(archive);
+        saveRecord(archive);
     }
 
     private static int readUnsignedByte(DataInputStream in) throws IOException {
@@ -261,6 +268,7 @@ public class WeatherLinkImporter {
         int i = in.readInt();
         return Integer.reverseBytes(i);
     }
+
     private static final int[] WIND_DIRECTION_DEGREES = new int[16];
 
     static {

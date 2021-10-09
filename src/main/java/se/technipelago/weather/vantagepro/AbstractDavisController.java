@@ -18,6 +18,7 @@ package se.technipelago.weather.vantagepro;
 
 import jssc.SerialPort;
 import jssc.SerialPortException;
+import se.technipelago.weather.AbstractController;
 import se.technipelago.weather.archive.ArchivePage;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
@@ -33,10 +34,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- *
  * @author goran
  */
-public abstract class AbstractController {
+public abstract class AbstractDavisController extends AbstractController {
 
     protected final Logger log = Logger.getLogger(getClass().getName());
 
@@ -47,7 +47,7 @@ public abstract class AbstractController {
 
     protected abstract void run();
 
-    protected void start(String[] args) throws IOException {
+    protected void startRemote(String[] args) throws IOException {
         Socket connection = null;
         try {
             String host = args.length > 0 ? args[0] : "localhost";
@@ -150,6 +150,94 @@ public abstract class AbstractController {
         //logNL();
 
         return buf;
+    }
+
+    public void test() throws IOException {
+        byte[] buf;
+
+        // Send wakeup command.
+        if (wakeup()) {
+            log("\t", "The station is awake.");
+        } else {
+            log.warning("No response from station");
+            return;
+        }
+
+        log.fine("Connected to weather station");
+
+        // Test command.
+        writeString("TEST\n");
+        expectString("\n\rTEST\n\r");
+
+        // Determine station type.
+        out.write(new byte[]{'W', 'R', 'D', 0x12, 0x4d, '\n'});
+        log(OUT, "WRD<0x12><0x4d>\n");
+        buf = readBytes(2);
+        if (buf[0] != Constants.ACK) {
+            throw new IOException("Invalid response");
+        }
+        String stationType = getStationType(buf[1]);
+        if (stationType == null) {
+            throw new IOException("Unsupported station type: " + String.valueOf((int) buf[1]));
+        }
+        log("\t", "The station is a " + stationType);
+
+        // Firmware version.
+        writeString("VER\n");
+        expectString("\n\rOK\n\r");
+        byte[] line = VantageUtil.readLine(in);
+        log(IN, new String(line));
+
+        // Get current station time.
+        writeString("GETTIME\n");
+        if (in.read() != Constants.ACK) {
+            throw new IOException("Invalid response");
+        }
+        log(IN, "<ACK>");
+        buf = readBytes(8);
+        if (!CRC16.check(buf, 0, 8)) {
+            throw new IOException("CRC error");
+        }
+
+        // Get station time.
+        Date serverTime = new Date();
+        Date consoleTime = VantageUtil.getTime(buf, 0);
+        log("\t", "Console Time: " + consoleTime);
+    }
+
+    public void configure() throws IOException {
+        // Send wakeup command.
+        if (wakeup()) {
+            log("\t", "The station is awake.");
+        } else {
+            log.warning("No response from station");
+            return;
+        }
+
+        log.fine("Connected to weather station");
+        setConsoleTime(new Date());
+        writeString("SETPER 10\n");
+        expectString("\n\rOK\n\r");
+        sleep(1200);
+    }
+
+    protected void clear() throws IOException {
+        // Send wakeup command.
+        if (wakeup()) {
+            log("\t", "The station is awake.");
+        } else {
+            log.warning("No response from station");
+            return;
+        }
+
+        log.fine("Connected to weather station");
+        writeString("CLRLOG\n");
+        sleep(3000);
+        if (in.read() != Constants.ACK) {
+            throw new IOException("Invalid response");
+        }
+        log(IN, "<ACK>");
+        log.fine("Archive data cleared");
     }
 
     protected boolean wakeup() throws IOException {

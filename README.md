@@ -45,17 +45,18 @@ Then go to the folder where you extracted the archive and start the weather coll
 
 ## Run
 
-    bin/weather-collector-VERSION /dev/ttyUSB0 19200
+    cd weather-collector-VERSION
+    ./bin/weather-collector /dev/ttyUSB0 19200
 
-With `VERSION` being equal to the release version e.g. `1.4.2`.
+With `VERSION` being equal to the release version e.g. `1.5.0`.
 
-The default database engine is H2 (www.h2database.com) and data is stored in a file called `weather-db.mv.db`.
-You can configure another JDBC database using the `datastore.xxx` properties (see below).
-A suitable JDBC driver .jar must be located in the weather-collector-1.4.2/lib folder at runtime.
+The default database engine is H2 (www.h2database.com) and data is stored in a file called `weather-db.mv.db`. You can
+configure another JDBC database using the `datastore.xxx` properties (see below). A suitable JDBC driver .jar must be
+located in the weather-collector-VERSION/lib folder at runtime.
 
-The first time you run the program with an empty database, it downloads **all** records from the weather station.
-This can take a long time (10 minutes). The next time you run the program,
-it will only download records created since the last download, so that should only take a few seconds.
+The first time you run the program with an empty database, it downloads **all** records from the weather station. This
+can take a long time (10 minutes). The next time you run the program, it will only download records created since the
+last download, so that should only take a few seconds.
 
 To make it easier to start the collector from `cron` or from the command line, create a start script.
 
@@ -64,7 +65,7 @@ To make it easier to start the collector from `cron` or from the command line, c
     #!/bin/bash
     #
     WEATHER_HOME=$HOME/weather
-    VERSION=1.4.2       # Example
+    VERSION=1.5.0       # Example
     COLLECTOR_HOME=$WEATHER_HOME/weather-collector-$VERSION
     SERIAL_PORT=/dev/ttyUSB0
     SERIAL_BAUD=19200
@@ -75,18 +76,26 @@ To make it easier to start the collector from `cron` or from the command line, c
 
 ### Sample collector.properties
 
-Put `collector.properties` in the `weather-collector-VERSION` directory and `cd` to that directory before you start the program.
+Put `collector.properties` in the `weather-collector-VERSION` directory and `cd` to that directory before you start the
+program.
+
+#### MySQL storage
 
     datastore.type=jdbc
+    datastore.jdbc.class=se.technipelago.weather.datastore.sql.SqlDataStore
     datastore.name=weather
     datastore.jdbc.driver=com.mysql.jdbc.Driver
     datastore.jdbc.url=jdbc:mysql://localhost:3306/weather?user=weather&password=weather
 
+#### No storage (for testing)
+
+    datastore.type=dummy
+    datastore.dummy.class=se.technipelago.weather.datastore.DummyDataStore
+
 ### Sample collector-logging.properties
 
-Full debug logging to the console can be great the first time you run the program,
-to see that things works ok.
-Later you can configure a file logger with reduced logging  in production.
+Full debug logging to the console can be great the first time you run the program, to see that things works ok. Later
+you can configure a file logger with reduced logging in production.
 
 Put `collector-logging.properties` in the `weather-collector-VERSION` directory.
 

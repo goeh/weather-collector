@@ -45,6 +45,8 @@ archive and start the weather collector.
 
 ## Run
 
+To run the program you must have a configuration file. See section "Sample collector.properties" below.
+
 ### Run from source
 
     ./gradlew run --args='/dev/ttyUSB0 19200'
@@ -96,7 +98,7 @@ program. You can also put `collector.properties` anywhere on the Java classpath.
     datastore.type=jdbc
     datastore.jdbc.class=se.technipelago.weather.datastore.sql.SqlDataStore
     datastore.jdbc.name=weather
-    datastore.jdbc.driver=com.mysql.jdbc.Driver
+    datastore.jdbc.driver=com.mysql.cj.jdbc.Driver
     datastore.jdbc.url=jdbc:mysql://localhost:3306/weather?user=weather&password=weather
 
 #### No storage (for testing)
@@ -114,7 +116,7 @@ store with `datastore.xxx` prefix.
     datastore.type=db,ds1,ds2
 
     datastore.db.class=se.technipelago.weather.datastore.sql.SqlDataStore
-    datastore.db.driver=com.mysql.jdbc.Driver
+    datastore.db.driver=com.mysql.cj.jdbc.Driver
     datastore.db.url=jdbc:mysql://localhost:3306/weather?user=weather&password=weather
 
     datastore.ds1.class=se.technipelago.weather.datastore.DummyDataStore

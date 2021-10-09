@@ -165,12 +165,16 @@ public class PulsarDataStore implements DataStore {
         final String formattedtimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
                 .format(timestamp);
 
+        final String formatteddate = new SimpleDateFormat("yyyy-MM-dd")
+                .format(timestamp);
+
         producer.newMessage().value(DavisMessage.builder()
-                .uuid(uuid)
+                .sensor(uuid)
                 .latitude(lat)
                 .longitude(lon)
                 .altitude(alt)
                 .ts(formattedtimestamp)
+                .date(formatteddate)
                 .temp_out((float) rec.getOutsideTemperature())
                 .temp_in((float) rec.getInsideTemperature())
                 .hum_out((short) rec.getOutsideHumidity())

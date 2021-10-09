@@ -8,11 +8,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DavisMessage {
-    String uuid;
+    String sensor;
     float latitude;
     float longitude;
     float altitude;
     String ts;
+    String date;
     float temp_out;
     float temp_in;
     int hum_out;

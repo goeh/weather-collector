@@ -25,6 +25,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.datastore.DataStore;
@@ -35,14 +37,13 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Send weather data to opensensor.net.
  */
 public class OpenSensorDataStore implements DataStore {
 
-    private static final Logger log = Logger.getLogger(OpenSensorDataStore.class.getName());
+    private static final Logger log = LogManager.getLogger(OpenSensorDataStore.class);
 
     private Properties prop;
 
@@ -70,7 +71,7 @@ public class OpenSensorDataStore implements DataStore {
     public boolean insertData(ArchiveRecord rec) throws IOException {
         String url = prop.getProperty("url");
         if (url == null || url.trim().length() == 0) {
-            log.fine("No REST service configured");
+            log.debug("No REST service configured");
             return false;
         }
 
@@ -107,7 +108,7 @@ public class OpenSensorDataStore implements DataStore {
                     response.close();
                 }
 
-                log.fine("Weather data for " + payload.getSid() + " sent to " + url);
+                log.debug("Weather data for " + payload.getSid() + " sent to " + url);
             }
         } finally {
             httpPost.releaseConnection();
@@ -163,9 +164,9 @@ public class OpenSensorDataStore implements DataStore {
             field.setAccessible(true);
             return field.get(rec);
         } catch (NoSuchFieldException e) {
-            log.severe(e.getMessage());
+            log.error(e.getMessage());
         } catch (IllegalAccessException e) {
-            log.severe(e.getMessage());
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -223,9 +224,9 @@ public class OpenSensorDataStore implements DataStore {
             }
 
         } catch (ClientProtocolException e) {
-            log.severe(e.getMessage());
+            log.error(e.getMessage());
         } catch (IOException e) {
-            log.severe(e.getMessage());
+            log.error(e.getMessage());
         } finally {
             httpclient.close();
         }

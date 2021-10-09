@@ -16,19 +16,17 @@
  */
 package se.technipelago.weather.emulator.vantagepro;
 
+import org.apache.logging.log4j.LogManager;
 import se.technipelago.weather.emulator.Command;
 import se.technipelago.weather.vantagepro.CRC16;
-import se.technipelago.weather.vantagepro.CRCOutputStream;
 import se.technipelago.weather.vantagepro.Constants;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- *
  * @author goran
  */
 public class Loop implements Command, Runnable {
@@ -50,6 +48,7 @@ public class Loop implements Command, Runnable {
 
     /**
      * This constructor is called by the emulator.
+     *
      * @param reps
      */
     public Loop(int reps) {
@@ -58,6 +57,7 @@ public class Loop implements Command, Runnable {
 
     /**
      * This constructor is called by the command instance when it creates the runner thread.
+     *
      * @param reps
      * @param out
      */
@@ -82,11 +82,11 @@ public class Loop implements Command, Runnable {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
-                // Ignore.
+                    // Ignore.
                 }
             }
         } catch (IOException e) {
-            Logger.getLogger(Loop.class.getName()).log(Level.SEVERE, null, e);
+            LogManager.getLogger(Loop.class).error(e.getMessage());
         } finally {
             Loop.active = false;
         }
@@ -94,6 +94,7 @@ public class Loop implements Command, Runnable {
 
     /**
      * TODO: Write correct data packet.
+     *
      * @param num packet number
      * @return bytes for the LOOP data packet
      */

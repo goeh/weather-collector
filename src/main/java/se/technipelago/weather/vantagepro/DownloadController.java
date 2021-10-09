@@ -23,7 +23,6 @@ import se.technipelago.weather.archive.CurrentRecord;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.logging.Level;
 
 /**
  * @author Goran Ehrsson <goran@technipelago.se>
@@ -36,11 +35,10 @@ public class DownloadController extends AbstractDavisController {
     public void start(String[] args) {
         try {
             String firstArg = args.length > 0 ? args[0] : "localhost";
-            DownloadController controller = new DownloadController();
             if (firstArg.indexOf('/') != -1) {
-                controller.startLocal(args); // Local serial device
+                startLocal(args); // Local serial device
             } else {
-                controller.startRemote(args); // Remote virtual device
+                startRemote(args); // Remote virtual device
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -56,7 +54,7 @@ public class DownloadController extends AbstractDavisController {
             execute();
             sleep(3000);
         } catch (IOException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.error("Download failed", ex);
         } finally {
             cleanup();
         }
@@ -73,11 +71,11 @@ public class DownloadController extends AbstractDavisController {
         if (wakeup()) {
             log("\t", "The station is awake.");
         } else {
-            log.warning("No response from station");
+            log.warn("No response from station");
             return;
         }
 
-        log.fine("Connected to weather station");
+        log.debug("Connected to weather station");
 
         // Get current station time.
         writeString("GETTIME\n");
@@ -101,7 +99,7 @@ public class DownloadController extends AbstractDavisController {
         // Synchronize console time with server.
         long diff = serverTime.getTime() - consoleTime.getTime();
         if (Math.abs(diff) > 5000) {
-            log.fine("Console clock is out of sync: " + diff);
+            log.debug("Console clock is out of sync: " + diff);
             wakeup();
             setConsoleTime(new Date());
         }
@@ -112,7 +110,7 @@ public class DownloadController extends AbstractDavisController {
         long highTime = 0L;
         ArchivePage[] pages = download(lastTime);
         if (pages.length == 0) {
-            log.warning("No data downloaded");
+            log.warn("No data downloaded");
             return;
         }
         for (ArchivePage p : pages) {
@@ -123,12 +121,12 @@ public class DownloadController extends AbstractDavisController {
             }
         }
         Date last = new Date(highTime);
-        log.fine("Last recorded time was " + last);
+        log.debug("Last recorded time was " + last);
         saveStatus(last);
     }
 
     private Date savePage(ArchivePage p) {
-        log.fine("Saving page " + p.getPageNumber());
+        log.debug("Saving page " + p.getPageNumber());
         long highTime = 0;
         for (int i = 0; i < 5; i++) {
             ArchiveRecord rec = p.getRecord(i);
@@ -141,10 +139,10 @@ public class DownloadController extends AbstractDavisController {
                         highTime = l;
                     }
                 } else {
-                    log.warning("Invalid record: " + rec);
+                    log.warn("Invalid record: " + rec);
                 }
             } catch (IOException e) {
-                log.log(Level.WARNING, "Failed to save record: " + rec, e);
+                log.warn("Failed to save record: " + rec, e);
             }
         }
         return new Date(highTime);
@@ -161,7 +159,7 @@ public class DownloadController extends AbstractDavisController {
         try {
             getStatusDataStore().updateStatus(new Date(), lastRecord);
         } catch (IOException ex) {
-            log.log(Level.SEVERE, "Failed to update archive status", ex);
+            log.error("Failed to update archive status", ex);
         }
     }
 
@@ -172,7 +170,7 @@ public class DownloadController extends AbstractDavisController {
             try {
                 store.updateCurrent(current);
             } catch (IOException ex) {
-                log.log(Level.SEVERE, "Failed to update data store", ex);
+                log.error("Failed to update data store", ex);
             }
         });
     }

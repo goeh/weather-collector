@@ -16,6 +16,8 @@
  */
 package se.technipelago.weather.emulator.vantagepro;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import se.technipelago.weather.emulator.Command;
 import se.technipelago.weather.emulator.Emulator;
 import se.technipelago.weather.emulator.ServerCommand;
@@ -23,7 +25,6 @@ import se.technipelago.weather.emulator.ServerCommand;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 /**
  * Davis Vantage Pro 2 Emulator.
@@ -32,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class VantagePro2Emulator implements Emulator {
 
-    private static final Logger log = Logger.getLogger(VantagePro2Emulator.class.getName());
+    private static final Logger log = LogManager.getLogger(VantagePro2Emulator.class);
 
     private static final int BUF_LENGTH = 256;
     private byte[] inputBuffer = new byte[BUF_LENGTH];
@@ -61,7 +62,7 @@ public class VantagePro2Emulator implements Emulator {
                 if(input != null) {
                     Command cmd = getCommand(input);
                     if (cmd != null) {
-                        log.fine("Executing " + cmd.getClass().getName());
+                        log.debug("Executing " + cmd.getClass().getName());
                         cmd.execute(connection);
                     } else {
                         connection.getOutputStream().write("ERROR\n\r".getBytes());
@@ -83,8 +84,9 @@ public class VantagePro2Emulator implements Emulator {
 
     /**
      * Read bytes until NEWLINE.
-     * <br>NOTE This method is not the same as {@link VantageUtil#readLine(InputStream)}
+     * <br>NOTE This method is not the same as {@link se.technipelago.weather.vantagepro.VantageUtil#readLine(InputStream)}
      * which reads until CR.
+     *
      * @param is the input stream to read bytes from.
      * @return return a byte array up to but not including the NL or CR.
      * @throws java.io.IOException if the read operation fails.

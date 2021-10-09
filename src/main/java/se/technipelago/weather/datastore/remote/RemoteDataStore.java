@@ -9,6 +9,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.datastore.DataStore;
@@ -20,7 +22,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
-import java.util.logging.Logger;
 
 /**
  * Created by goran on 15-06-13.
@@ -29,7 +30,7 @@ public class RemoteDataStore implements DataStore {
 
     private static final String PROPERTIES_FILE = "collector.properties";
 
-    protected final Logger log = Logger.getLogger(getClass().getName());
+    protected final Logger log = LogManager.getLogger(getClass().getName());
 
     private String url;
     private String clientKey;
@@ -45,17 +46,17 @@ public class RemoteDataStore implements DataStore {
     public void init(Properties prop) {
         url = prop.getProperty("url");
         if (StringUtils.isEmpty(url)) {
-            log.severe("Property 'url' must be set");
+            log.error("Property 'url' must be set");
             return;
         }
         clientKey = prop.getProperty("client.key");
         if (StringUtils.isEmpty(clientKey)) {
-            log.severe("Property 'client.key' must be set");
+            log.error("Property 'client.key' must be set");
             return;
         }
         clientSecret = prop.getProperty("client.secret");
         if (StringUtils.isEmpty(clientSecret)) {
-            log.severe("Property 'client.secret' must be set");
+            log.error("Property 'client.secret' must be set");
             return;
         }
     }
@@ -76,7 +77,7 @@ public class RemoteDataStore implements DataStore {
     public boolean insertData(ArchiveRecord rec) throws IOException {
 
         if (url == null || url.trim().length() == 0) {
-            log.fine("No REST service configured");
+            log.debug("No REST service configured");
             return false;
         }
         CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -160,7 +161,7 @@ public class RemoteDataStore implements DataStore {
             response.close();
         }
 
-        log.fine("Weather data for " + timestamp + " sent to " + url);
+        log.debug("Weather data for " + timestamp + " sent to " + url);
 
         return false;
     }
@@ -172,7 +173,7 @@ public class RemoteDataStore implements DataStore {
     public void updateCurrent(CurrentRecord rec) throws IOException {
 
         if (url == null || url.trim().length() == 0) {
-            log.fine("No REST service configured");
+            log.debug("No REST service configured");
             return;
         }
         CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -226,6 +227,6 @@ public class RemoteDataStore implements DataStore {
             response.close();
         }
 
-        log.fine("Current data for " + timestamp + " sent to " + url);
+        log.debug("Current data for " + timestamp + " sent to " + url);
     }
 }

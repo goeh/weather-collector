@@ -16,6 +16,8 @@
  */
 package se.technipelago.weather.datastore.sql;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.datastore.DataStore;
@@ -26,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A data persistence implementation that sore data in a SQL database.
@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  */
 public class SqlDataStore implements DataStore {
 
-    private static final Logger log = Logger.getLogger(SqlDataStore.class.getName());
+    private static final Logger log = LogManager.getLogger(SqlDataStore.class);
     private Connection conn;
     private PreparedStatement selectStatus;
     private PreparedStatement updateStatus;
@@ -51,10 +51,10 @@ public class SqlDataStore implements DataStore {
                 conn = DriverManager.getConnection(prop.getProperty("url", "jdbc:h2:file:./weatherDb"));
                 createTables();
             } catch (ClassNotFoundException e) {
-                log.log(Level.SEVERE, "Cannot find JDBC driver", e);
+                log.error("Cannot find JDBC driver", e);
                 throw new RuntimeException(e);
             } catch (SQLException e) {
-                log.log(Level.SEVERE, "Cannot connect to database", e);
+                log.error("Cannot connect to database", e);
                 throw new RuntimeException(e);
             }
         }
@@ -67,7 +67,7 @@ public class SqlDataStore implements DataStore {
                 updateStatus = conn.prepareStatement("UPDATE status SET last_dl = ?, last_rec = ?");
                 updateCurrent = conn.prepareStatement("UPDATE current SET bar_trend = ?, console_battery = ?, forecast_icons = ?, forecast_msg = ?, sunrise = ?, sunset = ?, ts = ?, transmit_battery = ?");
             } catch (SQLException e) {
-                log.log(Level.SEVERE, "Failed to prepare SQL statements", e);
+                log.error("Failed to prepare SQL statements", e);
                 throw new RuntimeException(e);
             }
         }
@@ -79,7 +79,7 @@ public class SqlDataStore implements DataStore {
             try {
                 insertData.close();
             } catch (SQLException ex) {
-                log.log(Level.WARNING, "Exception while closing INSERT statement", ex);
+                log.warn("Exception while closing INSERT statement", ex);
             }
             insertData = null;
         }
@@ -87,7 +87,7 @@ public class SqlDataStore implements DataStore {
             try {
                 selectData.close();
             } catch (SQLException ex) {
-                log.log(Level.WARNING, "Exception while closing SELECT statement", ex);
+                log.warn("Exception while closing SELECT statement", ex);
             }
             selectData = null;
         }
@@ -95,7 +95,7 @@ public class SqlDataStore implements DataStore {
             try {
                 updateStatus.close();
             } catch (SQLException ex) {
-                log.log(Level.WARNING, "Exception while closing INSERT statement", ex);
+                log.warn("Exception while closing INSERT statement", ex);
             }
             updateStatus = null;
         }
@@ -103,7 +103,7 @@ public class SqlDataStore implements DataStore {
             try {
                 selectStatus.close();
             } catch (SQLException ex) {
-                log.log(Level.WARNING, "Exception while closing SELECT statement", ex);
+                log.warn("Exception while closing SELECT statement", ex);
             }
             selectStatus = null;
         }
@@ -111,7 +111,7 @@ public class SqlDataStore implements DataStore {
             try {
                 updateCurrent.close();
             } catch (SQLException ex) {
-                log.log(Level.WARNING, "Exception while closing UPDATE statement", ex);
+                log.warn("Exception while closing UPDATE statement", ex);
             }
             updateCurrent = null;
         }
@@ -119,7 +119,7 @@ public class SqlDataStore implements DataStore {
             try {
                 conn.close();
             } catch (SQLException ex) {
-                log.log(Level.SEVERE, "Cannot close database connection", ex);
+                log.error("Cannot close database connection", ex);
             }
             conn = null;
         }
@@ -167,7 +167,7 @@ public class SqlDataStore implements DataStore {
                 d = insertStatus(EPOCH, EPOCH);
             }
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Failed to get archive status", ex);
+            log.error("Failed to get archive status", ex);
         }
         return d;
     }
@@ -294,6 +294,6 @@ public class SqlDataStore implements DataStore {
         } finally {
             stmt.close();
         }
-        log.fine("Database tables created successfully");
+        log.debug("Database tables created successfully");
     }
 }

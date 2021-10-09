@@ -1,5 +1,7 @@
 package se.technipelago.weather.datastore;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 
@@ -8,14 +10,13 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 /**
  * A data store that prints to stdout.
  */
 public class DummyDataStore implements DataStore {
 
-    protected final Logger log = Logger.getLogger(getClass().getName());
+    protected final Logger log = LogManager.getLogger(getClass().getName());
 
     private Date lastRecordTime = Date.from(Instant.now().minus(1, ChronoUnit.HOURS));
 

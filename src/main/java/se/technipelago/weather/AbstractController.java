@@ -1,18 +1,18 @@
 package se.technipelago.weather;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.datastore.DataStore;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class AbstractController implements Controller {
 
-    protected final Logger log = Logger.getLogger(getClass().getName());
+    protected final Logger log = LogManager.getLogger(getClass().getName());
 
     private final Map<String, DataStore> stores = new HashMap<>();
     private String statusDataStore;
@@ -29,7 +29,7 @@ public abstract class AbstractController implements Controller {
 
         final String statusType = prop.getProperty("datastore.status");
         setStatusDataStore(StringUtils.isEmpty(statusType) ? types.get(0) : statusType);
-        log.fine("Data store " + statusDataStore + " will be used to store download status");
+        log.debug("Data store " + statusDataStore + " will be used to store download status");
     }
 
     protected DataStore initDataStore(String type, Properties prop) {
@@ -73,7 +73,8 @@ public abstract class AbstractController implements Controller {
         getDataStores().put(type, store);
     }
 
-    protected DataStore getDataStore(String type) {
+    @Override
+    public DataStore getDataStore(String type) {
         return getDataStores().get(type);
     }
 
@@ -104,10 +105,10 @@ public abstract class AbstractController implements Controller {
         forEachDataStore(store -> {
             try {
                 if (!store.insertData(rec)) {
-                    log.fine("Record already saved: " + rec);
+                    log.debug("Record already saved: " + rec);
                 }
             } catch (Exception e) {
-                log.log(Level.SEVERE, "Failed to save weather data", e);
+                log.error("Failed to save weather data", e);
             }
         });
     }
@@ -117,7 +118,7 @@ public abstract class AbstractController implements Controller {
             try {
                 store.cleanup();
             } catch (Exception e) {
-                log.log(Level.SEVERE, "Failed to cleanup data store " + store.getClass().getName(), e);
+                log.error("Failed to cleanup data store " + store.getClass().getName(), e);
             }
         });
     }

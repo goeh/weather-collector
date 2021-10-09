@@ -18,6 +18,8 @@ package se.technipelago.weather.vantagepro;
 
 import jssc.SerialPort;
 import jssc.SerialPortException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import se.technipelago.weather.AbstractController;
 import se.technipelago.weather.archive.ArchivePage;
 import se.technipelago.weather.archive.ArchiveRecord;
@@ -31,15 +33,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author goran
  */
 public abstract class AbstractDavisController extends AbstractController {
 
-    protected final Logger log = Logger.getLogger(getClass().getName());
+    protected final Logger log = LogManager.getLogger(getClass());
 
     protected static final String IN = "< ";
     protected static final String OUT = "> ";
@@ -53,7 +53,7 @@ public abstract class AbstractDavisController extends AbstractController {
         try {
             String host = args.length > 0 ? args[0] : "localhost";
             int port = args.length > 1 ? Integer.parseInt(args[1]) : 8888;
-            log.fine("Downloading weather data from " + host + ":" + port);
+            log.debug("Downloading weather data from " + host + ":" + port);
             connection = new Socket(host, port);
             connection.setSoTimeout(5000);
             in = connection.getInputStream();
@@ -64,21 +64,21 @@ public abstract class AbstractDavisController extends AbstractController {
                 try {
                     out.close();
                 } catch (IOException ex) {
-                    log.log(Level.WARNING, "Failed to close connection", ex);
+                    log.warn("Failed to close connection", ex);
                 }
             }
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException ex) {
-                    log.log(Level.WARNING, "Failed to close connection", ex);
+                    log.warn("Failed to close connection", ex);
                 }
             }
             if (connection != null) {
                 try {
                     connection.close();
                 } catch (IOException ex) {
-                    log.log(Level.WARNING, "Failed to close connection", ex);
+                    log.warn("Failed to close connection", ex);
                 }
             }
         }
@@ -89,7 +89,7 @@ public abstract class AbstractDavisController extends AbstractController {
         int baud = args.length > 1 ? Integer.parseInt(args[1]) : 19200;
         SerialPort serialPort = new SerialPort(portName);
         RingBuffer buffer = new RingBuffer();
-        log.fine("Downloading weather data from " + portName);
+        log.debug("Downloading weather data from " + portName);
         try {
             serialPort.openPort();
             serialPort.setParams(baud, 8, 1, 0);
@@ -100,20 +100,20 @@ public abstract class AbstractDavisController extends AbstractController {
             run();
             //serialPort.closePort();
         } catch (SerialPortException ex) {
-            log.log(Level.SEVERE, "Failed to initialize serial connection", ex);
+            log.error("Failed to initialize serial connection", ex);
         } finally {
             if (out != null) {
                 try {
                     out.close();
                 } catch (IOException ex) {
-                    log.log(Level.WARNING, "Failed to close connection", ex);
+                    log.warn("Failed to close connection", ex);
                 }
             }
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException ex) {
-                    log.log(Level.WARNING, "Failed to close connection", ex);
+                    log.warn("Failed to close connection", ex);
                 }
             }
         }
@@ -160,11 +160,11 @@ public abstract class AbstractDavisController extends AbstractController {
         if (wakeup()) {
             log("\t", "The station is awake.");
         } else {
-            log.warning("No response from station");
+            log.warn("No response from station");
             return;
         }
 
-        log.fine("Connected to weather station");
+        log.debug("Connected to weather station");
 
         // Test command.
         writeString("TEST\n");
@@ -211,11 +211,11 @@ public abstract class AbstractDavisController extends AbstractController {
         if (wakeup()) {
             log("\t", "The station is awake.");
         } else {
-            log.warning("No response from station");
+            log.warn("No response from station");
             return;
         }
 
-        log.fine("Connected to weather station");
+        log.debug("Connected to weather station");
         setConsoleTime(new Date());
         writeString("SETPER 10\n");
         expectString("\n\rOK\n\r");
@@ -227,18 +227,18 @@ public abstract class AbstractDavisController extends AbstractController {
         if (wakeup()) {
             log("\t", "The station is awake.");
         } else {
-            log.warning("No response from station");
+            log.warn("No response from station");
             return;
         }
 
-        log.fine("Connected to weather station");
+        log.debug("Connected to weather station");
         writeString("CLRLOG\n");
         sleep(3000);
         if (in.read() != Constants.ACK) {
             throw new IOException("Invalid response");
         }
         log(IN, "<ACK>");
-        log.fine("Archive data cleared");
+        log.debug("Archive data cleared");
     }
 
     protected boolean wakeup() throws IOException {
@@ -401,7 +401,7 @@ public abstract class AbstractDavisController extends AbstractController {
         if (startRecord == null) {
             throw new IllegalArgumentException("startRecord must be != null");
         }
-        log.fine("Downloading records after " + startRecord);
+        log.debug("Downloading records after " + startRecord);
         writeString("DMPAFT\n");
         if (in.read() != Constants.ACK) {
             throw new IOException("Invalid response");
@@ -628,10 +628,10 @@ public abstract class AbstractDavisController extends AbstractController {
     }
 
     protected void log(String prefix, String string) {
-        log.fine(prefix + escape(string));
+        log.debug(prefix + escape(string));
     }
 
     protected void log(String prefix, byte[] bytes, int offset, int length) {
-        log.fine(prefix + escape(bytes, offset, length, false));
+        log.debug(prefix + escape(bytes, offset, length, false));
     }
 }

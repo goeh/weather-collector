@@ -1,5 +1,7 @@
 package se.technipelago.weather;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.datastore.DataStore;
@@ -9,18 +11,17 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 /**
  * A data store used in tests.
  */
 public class TestDataStore implements DataStore {
 
-    protected final Logger log = Logger.getLogger(getClass().getName());
+    protected final Logger log = LogManager.getLogger(getClass().getName());
 
     public static String param;
 
-    private Date lastRecordTime = Date.from(Instant.now().minus(1, ChronoUnit.HOURS));
+    private Date lastRecordTime = Date.from(Instant.now().minus(2, ChronoUnit.HOURS));
 
     @Override
     public void init(Properties prop) {

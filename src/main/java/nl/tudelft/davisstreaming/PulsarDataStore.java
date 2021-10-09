@@ -1,5 +1,7 @@
 package nl.tudelft.davisstreaming;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
 import se.technipelago.weather.WeatherUtils;
 import se.technipelago.weather.archive.ArchiveRecord;
@@ -14,8 +16,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 public class PulsarDataStore implements DataStore {
@@ -30,7 +30,7 @@ public class PulsarDataStore implements DataStore {
 
     private static final String PROPERTIES_FILE = "pulsar.properties";
 
-    private static final Logger log = Logger.getLogger(PulsarDataStore.class.getName());
+    private static final Logger log = LogManager.getLogger(PulsarDataStore.class);
 
     final Properties prop = WeatherUtils.loadProperties(PROPERTIES_FILE);
 
@@ -51,16 +51,16 @@ public class PulsarDataStore implements DataStore {
                 conn = DriverManager.getConnection("jdbc:h2:file:./statusDb");
                 createTables(); // TODO this is called every time.
             } catch (SQLException e) {
-                log.severe("Cannot connect to database");
+                log.error("Cannot connect to database", e);
                 throw new RuntimeException(e);
             }
-            log.fine("SQL data store initialized");
+            log.debug("SQL data store initialized");
         }
         try {
             selectStatus = conn.prepareStatement("SELECT last_rec FROM status");
             updateStatus = conn.prepareStatement("UPDATE status SET last_dl = ?, last_rec = ?");
         } catch (SQLException e) {
-            log.severe("Failed to prepare SQL statements");
+            log.error("Failed to prepare SQL statements", e);
             throw new RuntimeException(e);
         }
         if (client == null) {
@@ -95,7 +95,7 @@ public class PulsarDataStore implements DataStore {
             try {
                 updateStatus.close();
             } catch (SQLException ex) {
-                log.warning("Exception while closing INSERT statement");
+                log.warn("Exception while closing INSERT statement");
             }
             updateStatus = null;
         }
@@ -103,7 +103,7 @@ public class PulsarDataStore implements DataStore {
             try {
                 selectStatus.close();
             } catch (SQLException ex) {
-                log.warning("Exception while closing SELECT statement");
+                log.warn("Exception while closing SELECT statement");
             }
             selectStatus = null;
         }
@@ -111,7 +111,7 @@ public class PulsarDataStore implements DataStore {
             try {
                 updateCurrent.close();
             } catch (SQLException ex) {
-                log.warning("Exception while closing UPDATE statement");
+                log.warn("Exception while closing UPDATE statement");
             }
             updateCurrent = null;
         }
@@ -119,7 +119,7 @@ public class PulsarDataStore implements DataStore {
             try {
                 conn.close();
             } catch (SQLException ex) {
-                log.severe("Cannot close database connection");
+                log.error("Cannot close database connection", ex);
             }
             conn = null;
         }
@@ -127,14 +127,14 @@ public class PulsarDataStore implements DataStore {
             try {
                 producer.close();
             } catch (PulsarClientException ex) {
-                log.warning("Exception while closing Pulsar producer");
+                log.warn("Exception while closing Pulsar producer");
             }
         }
         if (client != null) {
             try {
                 client.close();
             } catch (PulsarClientException ex) {
-                log.warning("Exception while closing Pulsar client");
+                log.warn("Exception while closing Pulsar client");
             }
         }
     }
@@ -151,7 +151,7 @@ public class PulsarDataStore implements DataStore {
                 d = insertStatus(EPOCH, EPOCH);
             }
         } catch (SQLException ex) {
-            log.log(Level.SEVERE, "Failed to get archive status", ex);
+            log.error("Failed to get archive status", ex);
         }
         return d;
     }
@@ -159,7 +159,7 @@ public class PulsarDataStore implements DataStore {
     @Override
     public boolean insertData(ArchiveRecord rec) throws IOException {
 
-        log.fine("Sending message to Pulsar.");
+        log.debug("Sending message to Pulsar.");
         Timestamp timestamp = new Timestamp(rec.getTimestamp().getTime());
 
         final String formattedtimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
@@ -237,7 +237,7 @@ public class PulsarDataStore implements DataStore {
             assert stmt != null;
             stmt.close();
         }
-        log.fine("Database tables created successfully");
+        log.debug("Database tables created successfully");
     }
 
 }

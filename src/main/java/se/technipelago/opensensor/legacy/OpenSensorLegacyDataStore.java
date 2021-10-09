@@ -9,6 +9,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.datastore.DataStore;
@@ -19,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
-import java.util.logging.Logger;
 
 /**
  * @author Goran Ehrsson
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class OpenSensorLegacyDataStore implements DataStore {
 
-    protected final Logger log = Logger.getLogger(getClass().getName());
+    protected final Logger log = LogManager.getLogger(getClass().getName());
 
     private String url;
     private String clientKey;
@@ -37,17 +38,17 @@ public class OpenSensorLegacyDataStore implements DataStore {
     public void init(Properties prop) {
         url = prop.getProperty("url");
         if (StringUtils.isEmpty(url)) {
-            log.severe("Property 'url' must be set");
+            log.error("Property 'url' must be set");
             return;
         }
         clientKey = prop.getProperty("client.key");
         if (StringUtils.isEmpty(clientKey)) {
-            log.severe("Property 'client.key' must be set");
+            log.error("Property 'client.key' must be set");
             return;
         }
         clientSecret = prop.getProperty("client.secret");
         if (StringUtils.isEmpty(clientSecret)) {
-            log.severe("Property 'client.secret' must be set");
+            log.error("Property 'client.secret' must be set");
             return;
         }
     }
@@ -111,7 +112,7 @@ public class OpenSensorLegacyDataStore implements DataStore {
             EntityUtils.consume(entity);
         }
 
-        log.fine("Weather data for " + timestamp + " sent to " + url);
+        log.debug("Weather data for " + timestamp + " sent to " + url);
 
         return false;
     }

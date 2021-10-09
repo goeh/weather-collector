@@ -31,8 +31,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,7 +88,7 @@ public class WeatherLinkImporter extends AbstractController {
                     try {
                         in.close();
                     } catch (IOException ex) {
-                        Logger.getLogger(WeatherLinkImporter.class.getName()).log(Level.SEVERE, null, ex);
+                        log.warn("Failed to close input stream");
                     }
                 }
             }

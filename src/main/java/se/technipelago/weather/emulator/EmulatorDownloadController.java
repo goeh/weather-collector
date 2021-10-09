@@ -3,7 +3,6 @@ package se.technipelago.weather.emulator;
 import se.technipelago.weather.vantagepro.DownloadController;
 
 import java.io.IOException;
-import java.util.logging.Level;
 
 /**
  * @author Goran Ehrsson
@@ -14,7 +13,7 @@ public class EmulatorDownloadController extends DownloadController {
         try {
             writeString("QUIT\n");
         } catch (IOException ex) {
-            log.log(Level.SEVERE, "Cannot stop the receiver thread", ex);
+            log.error("Cannot stop the receiver thread", ex);
         }
         super.cleanup();
     }

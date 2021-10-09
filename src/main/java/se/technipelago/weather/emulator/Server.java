@@ -16,13 +16,14 @@
  */
 package se.technipelago.weather.emulator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import se.technipelago.weather.emulator.vantagepro.VantagePro2Emulator;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.logging.Logger;
 
 /**
  * Weather station emulator server.
@@ -31,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class Server {
 
-    private static final Logger log = Logger.getLogger(Server.class.getName());
+    private static final Logger log = LogManager.getLogger(Server.class.getName());
 
     private static boolean keepRunning = true;
     private int port;

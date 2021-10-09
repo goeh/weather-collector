@@ -29,16 +29,12 @@ import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.datastore.DataStore;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -46,37 +42,13 @@ import java.util.logging.Logger;
  */
 public class OpenSensorDataStore implements DataStore {
 
-    private static final String PROPERTIES_FILE = "opensensor.properties";
-
     private static final Logger log = Logger.getLogger(OpenSensorDataStore.class.getName());
 
-    private Properties getProperties() {
-        final Properties prop = new Properties();
-        InputStream fis = null;
-        try {
-            File file = new File(PROPERTIES_FILE);
-            if (file.exists()) {
-                fis = new FileInputStream(file);
-                prop.load(fis);
-            } else {
-                log.log(Level.WARNING, PROPERTIES_FILE + " not found, data will not be uploaded");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException ignore) {
-                }
-            }
-        }
-        return prop;
-    }
+    private Properties prop;
 
     @Override
     public void init(Properties prop) {
-        log.fine("Open Sensor datastore initialized");
+        this.prop = prop;
     }
 
     @Override
@@ -96,19 +68,17 @@ public class OpenSensorDataStore implements DataStore {
 
     @Override
     public boolean insertData(ArchiveRecord rec) throws IOException {
-
-        final Properties prop = getProperties();
-        String url = prop.getProperty("opensensor.url");
+        String url = prop.getProperty("url");
         if (url == null || url.trim().length() == 0) {
             log.fine("No REST service configured");
             return false;
         }
 
-        String username = prop.getProperty("opensensor.username");
-        String password = prop.getProperty("opensensor.password");
-        String clientId = prop.getProperty("opensensor.clientId");
-        String clientSecret = prop.getProperty("opensensor.clientSecret");
-        String tokenUrl = prop.getProperty("opensensor.accessTokenUri");
+        String username = prop.getProperty("username");
+        String password = prop.getProperty("password");
+        String clientId = prop.getProperty("clientId");
+        String clientSecret = prop.getProperty("clientSecret");
+        String tokenUrl = prop.getProperty("accessTokenUri");
 
         String accessToken = getAccessToken(URI.create(tokenUrl), username, password, clientId, clientSecret);
         CloseableHttpClient httpclient = HttpClients.createDefault();

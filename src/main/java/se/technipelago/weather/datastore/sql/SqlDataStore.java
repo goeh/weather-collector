@@ -20,10 +20,7 @@ import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.datastore.DataStore;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,7 +37,6 @@ import java.util.logging.Logger;
 public class SqlDataStore implements DataStore {
 
     private static final Logger log = Logger.getLogger(SqlDataStore.class.getName());
-    private static final String PROPERTIES_FILE = "collector.properties";
     private Connection conn;
     private PreparedStatement selectStatus;
     private PreparedStatement updateStatus;
@@ -48,35 +44,11 @@ public class SqlDataStore implements DataStore {
     private PreparedStatement insertData;
     private PreparedStatement updateCurrent;
 
-    private Properties getProperties() {
-        final Properties prop = new Properties();
-        InputStream fis = null;
-        try {
-            File file = new File(PROPERTIES_FILE);
-            if (file.exists()) {
-                fis = new FileInputStream(file);
-                prop.load(fis);
-            } else {
-                log.log(Level.WARNING, PROPERTIES_FILE + " not found, using default storage.");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException ignore) {
-                }
-            }
-        }
-        return prop;
-    }
-
     public void init(Properties prop) {
         if (conn == null) {
             try {
-                Class.forName(prop.getProperty("datastore.jdbc.driver", "org.h2.Driver"));
-                conn = DriverManager.getConnection(prop.getProperty("datastore.jdbc.url", "jdbc:h2:file:./weatherDb"));
+                Class.forName(prop.getProperty("driver", "org.h2.Driver"));
+                conn = DriverManager.getConnection(prop.getProperty("url", "jdbc:h2:file:./weatherDb"));
                 createTables();
             } catch (ClassNotFoundException e) {
                 log.log(Level.SEVERE, "Cannot find JDBC driver", e);

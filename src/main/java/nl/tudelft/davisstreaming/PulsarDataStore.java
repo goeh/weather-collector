@@ -1,14 +1,12 @@
 package nl.tudelft.davisstreaming;
 
 import org.apache.pulsar.client.api.*;
+import se.technipelago.weather.WeatherUtils;
 import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 import se.technipelago.weather.datastore.DataStore;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,31 +32,7 @@ public class PulsarDataStore implements DataStore {
 
     private static final Logger log = Logger.getLogger(PulsarDataStore.class.getName());
 
-    private Properties getProperties() {
-        final Properties prop = new Properties();
-        InputStream fis = null;
-        try {
-            File file = new File(PROPERTIES_FILE);
-            if (file.exists()) {
-                fis = new FileInputStream(file);
-                prop.load(fis);
-            } else {
-                log.log(Level.SEVERE, PROPERTIES_FILE + " not found, data will not be sent.");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException ignore) {
-                }
-            }
-        }
-        return prop;
-    }
-
-    final Properties prop = getProperties();
+    final Properties prop = WeatherUtils.loadProperties(PROPERTIES_FILE);
 
     final String service_url = prop.getProperty("pulsar.service_url");
     final String topic = prop.getProperty("pulsar.topic");
@@ -71,6 +45,7 @@ public class PulsarDataStore implements DataStore {
 
     @Override
     public void init(Properties prop) {
+        // TODO use properties provided here instead of our own property file?
         if (conn == null) {
             try {
                 conn = DriverManager.getConnection("jdbc:h2:file:./statusDb");
@@ -191,30 +166,30 @@ public class PulsarDataStore implements DataStore {
                 .format(timestamp);
 
         producer.newMessage().value(DavisMessage.builder()
-                    .uuid(uuid)
-                    .latitude(lat)
-                    .longitude(lon)
-                    .altitude(alt)
-                    .ts(formattedtimestamp)
-                    .temp_out((float) rec.getOutsideTemperature())
-                    .temp_in((float) rec.getInsideTemperature())
-                    .hum_out((short) rec.getOutsideHumidity())
-                    .hum_in((short) rec.getInsideHumidity())
-                    .barometer(rec.getBarometer())
-                    .rain((float) rec.getRainFall())
-                    .rain_rate((float) rec.getRainRateHigh())
-                    .wind_avg((float) rec.getWindSpeedAvg())
-                    .wind_dir((short) rec.getWindDirection())
-                    .wind_high((float) rec.getWindSpeedHigh())
-                    .solar((short) rec.getSolarRadiation())
-                    .uv((float) rec.getUvIndex())
-                    .build()).send();
+                .uuid(uuid)
+                .latitude(lat)
+                .longitude(lon)
+                .altitude(alt)
+                .ts(formattedtimestamp)
+                .temp_out((float) rec.getOutsideTemperature())
+                .temp_in((float) rec.getInsideTemperature())
+                .hum_out((short) rec.getOutsideHumidity())
+                .hum_in((short) rec.getInsideHumidity())
+                .barometer(rec.getBarometer())
+                .rain((float) rec.getRainFall())
+                .rain_rate((float) rec.getRainRateHigh())
+                .wind_avg((float) rec.getWindSpeedAvg())
+                .wind_dir((short) rec.getWindDirection())
+                .wind_high((float) rec.getWindSpeedHigh())
+                .solar((short) rec.getSolarRadiation())
+                .uv((float) rec.getUvIndex())
+                .build()).send();
 
 //        producer.close();
 //        client.close();
 
         return true;
-        }
+    }
 
     public Date insertStatus(Date lastDownload, Date lastRecord) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("INSERT INTO status (last_dl, last_rec) VALUES (?, ?)");
@@ -230,14 +205,15 @@ public class PulsarDataStore implements DataStore {
             updateStatus.setTimestamp(1, new java.sql.Timestamp(lastDownload.getTime()));
             updateStatus.setTimestamp(2, new java.sql.Timestamp(lastRecord.getTime()));
             updateStatus.executeUpdate();
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             throw new IOException(e);
         }
         return lastRecord;
     }
 
     @Override
-    public void updateCurrent(CurrentRecord current) {}
+    public void updateCurrent(CurrentRecord current) {
+    }
 
     private void createTables() throws SQLException {
         DatabaseMetaData metaData = conn.getMetaData();

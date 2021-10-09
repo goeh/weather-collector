@@ -12,7 +12,7 @@ targetCompatibility = 1.8
 version = '1.5.0-SNAPSHOT'
 mainClassName = "se.technipelago.weather.Downloader"
 
-defaultTasks 'clean', 'distZip'
+defaultTasks 'clean', 'test', 'distZip'
 
 jar {
     manifest {

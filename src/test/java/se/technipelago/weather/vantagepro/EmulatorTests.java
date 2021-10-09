@@ -15,11 +15,18 @@ public class EmulatorTests {
             server = new Server();
             server.start(0);
         }).start();
+        // Wait for server to accept connections.
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @AfterAll
     public static void stopEmulator() {
         Server.shutdown();
+        // Wait for server to close connections.
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {

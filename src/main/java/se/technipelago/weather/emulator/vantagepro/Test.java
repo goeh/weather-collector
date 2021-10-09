@@ -17,6 +17,7 @@
 package se.technipelago.weather.emulator.vantagepro;
 
 import se.technipelago.weather.emulator.Command;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -29,6 +30,6 @@ public class Test implements Command {
 
     public void execute(Socket connection) throws IOException {
         OutputStream out = connection.getOutputStream();
-        out.write("TEST\n\r".getBytes());
+        out.write("\n\rTEST\n\r".getBytes());
     }
 }

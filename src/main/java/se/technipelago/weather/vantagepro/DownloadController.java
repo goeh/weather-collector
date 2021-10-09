@@ -22,7 +22,10 @@ import se.technipelago.weather.archive.ArchiveRecord;
 import se.technipelago.weather.archive.CurrentRecord;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Goran Ehrsson <goran@technipelago.se>
@@ -31,14 +34,21 @@ public class DownloadController extends AbstractDavisController {
 
     private static final String COLLECTOR_PROPERTIES = "collector.properties";
 
+    private boolean test;
+
     @Override
     public void start(String[] args) {
         try {
-            String firstArg = args.length > 0 ? args[0] : "localhost";
+            final List<String> arguments = new ArrayList<>(Arrays.asList(args));
+            if (!arguments.isEmpty() && "--test".equals(arguments.get(0))) {
+                this.test = true;
+                arguments.remove(0);
+            }
+            String firstArg = arguments.isEmpty() ? "localhost" : arguments.get(0);
             if (firstArg.indexOf('/') != -1) {
-                startLocal(args); // Local serial device
+                startLocal(arguments); // Local serial device
             } else {
-                startRemote(args); // Remote virtual device
+                startRemote(arguments); // Remote virtual device
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -48,10 +58,14 @@ public class DownloadController extends AbstractDavisController {
     protected void run() {
         init();
         try {
-            //configure();
-            //test();
-            //clear();
-            execute();
+            if (test) {
+                log.info("Test mode enabled");
+                //configure();
+                test();
+                //clear();
+            } else {
+                execute();
+            }
             sleep(3000);
         } catch (IOException ex) {
             log.error("Download failed", ex);
@@ -68,10 +82,7 @@ public class DownloadController extends AbstractDavisController {
         byte[] buf;
 
         // Send wakeup command.
-        if (wakeup()) {
-            log("\t", "The station is awake.");
-        } else {
-            log.warn("No response from station");
+        if (!wakeup()) {
             return;
         }
 
@@ -91,7 +102,7 @@ public class DownloadController extends AbstractDavisController {
         // Get station time.
         Date serverTime = new Date();
         Date consoleTime = VantageUtil.getTime(buf, 0);
-        log("\t", "Console Time: " + consoleTime);
+        log.debug("Console Time: {}", consoleTime);
 
         downloadAndSave();
         saveCurrentValues();
@@ -99,9 +110,10 @@ public class DownloadController extends AbstractDavisController {
         // Synchronize console time with server.
         long diff = serverTime.getTime() - consoleTime.getTime();
         if (Math.abs(diff) > 5000) {
-            log.debug("Console clock is out of sync: " + diff);
-            wakeup();
-            setConsoleTime(new Date());
+            log.debug("Console clock is out of sync: {}", diff);
+            if (wakeup()) {
+                setConsoleTime(new Date());
+            }
         }
     }
 
@@ -121,12 +133,12 @@ public class DownloadController extends AbstractDavisController {
             }
         }
         Date last = new Date(highTime);
-        log.debug("Last recorded time was " + last);
+        log.debug("Last recorded time was {}", last);
         saveStatus(last);
     }
 
     private Date savePage(ArchivePage p) {
-        log.debug("Saving page " + p.getPageNumber());
+        log.debug("Saving page {}", p.getPageNumber());
         long highTime = 0;
         for (int i = 0; i < 5; i++) {
             ArchiveRecord rec = p.getRecord(i);
@@ -139,10 +151,10 @@ public class DownloadController extends AbstractDavisController {
                         highTime = l;
                     }
                 } else {
-                    log.warn("Invalid record: " + rec);
+                    log.warn("Invalid record: {}", rec);
                 }
             } catch (IOException e) {
-                log.warn("Failed to save record: " + rec, e);
+                log.warn("Failed to save record: {}", rec, e);
             }
         }
         return new Date(highTime);

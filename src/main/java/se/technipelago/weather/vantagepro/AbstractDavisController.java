@@ -48,12 +48,13 @@ public abstract class AbstractDavisController extends AbstractController {
 
     protected abstract void run();
 
-    protected void startRemote(String[] args) throws IOException {
+    protected void startRemote(List<String> args) throws IOException {
         Socket connection = null;
         try {
-            String host = args.length > 0 ? args[0] : "localhost";
-            int port = args.length > 1 ? Integer.parseInt(args[1]) : 8888;
-            log.debug("Downloading weather data from " + host + ":" + port);
+            String host = args.isEmpty() ? "localhost" : args.get(0);
+            ;
+            int port = args.size() > 1 ? Integer.parseInt(args.get(1)) : 8888;
+            log.debug("Downloading weather data from {}:{}", host, port);
             connection = new Socket(host, port);
             connection.setSoTimeout(5000);
             in = connection.getInputStream();
@@ -84,12 +85,12 @@ public abstract class AbstractDavisController extends AbstractController {
         }
     }
 
-    protected void startLocal(String[] args) throws IOException {
-        String portName = args.length > 0 ? args[0] : "/dev/ttyUSB0";
-        int baud = args.length > 1 ? Integer.parseInt(args[1]) : 19200;
+    protected void startLocal(List<String> args) throws IOException {
+        String portName = args.isEmpty() ? "/dev/ttyUSB0" : args.get(0);
+        int baud = args.size() > 1 ? Integer.parseInt(args.get(1)) : 19200;
         SerialPort serialPort = new SerialPort(portName);
         RingBuffer buffer = new RingBuffer();
-        log.debug("Downloading weather data from " + portName);
+        log.debug("Downloading weather data from {}", portName);
         try {
             serialPort.openPort();
             serialPort.setParams(baud, 8, 1, 0);
@@ -119,6 +120,12 @@ public abstract class AbstractDavisController extends AbstractController {
         }
     }
 
+    protected void assertAck(String message) throws IOException {
+        if (in.read() != Constants.ACK) {
+            throw new IOException(message);
+        }
+    }
+
     protected void writeString(String string) throws IOException {
         out.write(string.getBytes());
         out.flush();
@@ -142,7 +149,7 @@ public abstract class AbstractDavisController extends AbstractController {
             int c = in.read();
             if (c != -1) {
                 buf[i] = (byte) (c & 0xff);
-            //logByte(buf[i]);
+                //logByte(buf[i]);
             } else {
                 throw new IOException("Unexpected EOF");
             }
@@ -157,10 +164,7 @@ public abstract class AbstractDavisController extends AbstractController {
         byte[] buf;
 
         // Send wakeup command.
-        if (wakeup()) {
-            log("\t", "The station is awake.");
-        } else {
-            log.warn("No response from station");
+        if (!wakeup()) {
             return;
         }
 
@@ -181,7 +185,7 @@ public abstract class AbstractDavisController extends AbstractController {
         if (stationType == null) {
             throw new IOException("Unsupported station type: " + String.valueOf((int) buf[1]));
         }
-        log("\t", "The station is a " + stationType);
+        log.debug("The station is a {}", stationType);
 
         // Firmware version.
         writeString("VER\n");
@@ -191,9 +195,7 @@ public abstract class AbstractDavisController extends AbstractController {
 
         // Get current station time.
         writeString("GETTIME\n");
-        if (in.read() != Constants.ACK) {
-            throw new IOException("Invalid response");
-        }
+        assertAck("Invalid response");
         log(IN, "<ACK>");
         buf = readBytes(8);
         if (!CRC16.check(buf, 0, 8)) {
@@ -201,42 +203,33 @@ public abstract class AbstractDavisController extends AbstractController {
         }
 
         // Get station time.
-        Date serverTime = new Date();
         Date consoleTime = VantageUtil.getTime(buf, 0);
-        log("\t", "Console Time: " + consoleTime);
+        log.debug("Console Time: {}", consoleTime);
     }
 
     public void configure() throws IOException {
         // Send wakeup command.
-        if (wakeup()) {
-            log("\t", "The station is awake.");
-        } else {
-            log.warn("No response from station");
+        if (!wakeup()) {
             return;
         }
 
         log.debug("Connected to weather station");
         setConsoleTime(new Date());
         writeString("SETPER 10\n");
-        expectString("\n\rOK\n\r");
+        assertAck("Invalid response");
         sleep(1200);
     }
 
     protected void clear() throws IOException {
         // Send wakeup command.
-        if (wakeup()) {
-            log("\t", "The station is awake.");
-        } else {
-            log.warn("No response from station");
+        if (!wakeup()) {
             return;
         }
 
         log.debug("Connected to weather station");
         writeString("CLRLOG\n");
         sleep(3000);
-        if (in.read() != Constants.ACK) {
-            throw new IOException("Invalid response");
-        }
+        assertAck("Invalid response");
         log(IN, "<ACK>");
         log.debug("Archive data cleared");
     }
@@ -251,9 +244,12 @@ public abstract class AbstractDavisController extends AbstractController {
                 expectString("\n\r");
                 awake = true;
             } catch (IOException e) {
-            // Ignore.
+                // Ignore.
             }
             sleep(2000);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug(awake ? "The station is awake" : "No response from station");
         }
         return awake;
     }
@@ -291,14 +287,13 @@ public abstract class AbstractDavisController extends AbstractController {
 
     /**
      * Set console time.
+     *
      * @param time the time to set
      * @throws java.io.IOException if a communication error occurs.
      */
     protected void setConsoleTime(final Date time) throws IOException {
         writeString("SETTIME\n");
-        if (in.read() != Constants.ACK) {
-            throw new IOException("Invalid response");
-        }
+        assertAck("Invalid response");
         Calendar cal = Calendar.getInstance();
         cal.setTime(time);
         byte[] bytes = new byte[6];
@@ -313,9 +308,7 @@ public abstract class AbstractDavisController extends AbstractController {
         CRC16 crc = new CRC16();
         crc.add(bytes);
         out.write(crc.getCrc());
-        if (in.read() != Constants.ACK) {
-            throw new IOException("Cannot set station time");
-        }
+        assertAck("Cannot set station time");
         // Wait a while because the station can get a little dizzy after SETTIME.
         sleep(3000);
     }
@@ -348,13 +341,14 @@ public abstract class AbstractDavisController extends AbstractController {
 
     /**
      * Return degrees Celcius.
+     *
      * @param buf
      * @param offset
      * @return
      */
     protected double parseTemperature(byte[] buf, int offset) {
         int f = ((int) buf[offset + 1] << 8) | (buf[offset] & 0xff) & 0xffff;
-        if(f == 32767) {
+        if (f == 32767) {
             return 0.0;
         }
         return VantageUtil.fahrenheit2celcius(f / 10.0);
@@ -362,13 +356,14 @@ public abstract class AbstractDavisController extends AbstractController {
 
     /**
      * Return degrees Celcius.
+     *
      * @param buf
      * @param offset
      * @return
      */
     protected double parseExtraTemperature(byte[] buf, int offset) {
         int f = (int) (buf[offset] & 0xff);
-        if(f == 255) {
+        if (f == 255) {
             return 0.0;
         }
         return VantageUtil.fahrenheit2celcius(f - 90.0);
@@ -376,6 +371,7 @@ public abstract class AbstractDavisController extends AbstractController {
 
     /**
      * Return millimeter rain.
+     *
      * @param buf
      * @param offset
      * @return
@@ -401,11 +397,9 @@ public abstract class AbstractDavisController extends AbstractController {
         if (startRecord == null) {
             throw new IllegalArgumentException("startRecord must be != null");
         }
-        log.debug("Downloading records after " + startRecord);
+        log.debug("Downloading records after {}", startRecord);
         writeString("DMPAFT\n");
-        if (in.read() != Constants.ACK) {
-            throw new IOException("Invalid response");
-        }
+        assertAck("Invalid response");
         log(IN, "<ACK>");
         CRC16 crc = new CRC16();
         byte[] dateBytes = VantageUtil.getDate(startRecord);
@@ -427,8 +421,8 @@ public abstract class AbstractDavisController extends AbstractController {
         }
         int numPages = parseWord(buf, 0);
         int startPage = parseWord(buf, 2);
-        log("\tNumber of pages: ", String.valueOf(numPages));
-        log("\tStart page: ", String.valueOf(startPage));
+        log.debug("Number of pages: {}", numPages);
+        log.debug("Start page: {}", startPage);
 
         out.write(Constants.ACK);
         log(OUT, "<ACK>");
@@ -443,6 +437,7 @@ public abstract class AbstractDavisController extends AbstractController {
             pages.add(ap);
             out.write(Constants.ACK);
             log(OUT, "<ACK>");
+            log.debug("Downloaded page {}/{}", i + 1, numPages);
         }
         return pages.toArray(new ArchivePage[pages.size()]);
     }
@@ -462,7 +457,7 @@ public abstract class AbstractDavisController extends AbstractController {
             rec.setRainRateHigh(parseRain(page, offset + 12));
             rec.setBarometer(parseBarometer(page, offset + 14));
             int solar = parseWord(page, offset + 16);
-            if(solar == 32767) {
+            if (solar == 32767) {
                 solar = 0;
             }
             rec.setSolarRadiation(solar);
@@ -483,8 +478,10 @@ public abstract class AbstractDavisController extends AbstractController {
             rec.setExtraTemperature2(parseExtraTemperature(page, offset + 46));
             rec.setExtraTemperature3(parseExtraTemperature(page, offset + 47));
 
-            humidity = (int) page[offset + 43]; rec.setExtraHumidity1(humidity == -1 ? 0 : humidity);
-            humidity = (int) page[offset + 44]; rec.setExtraHumidity2(humidity == -1 ? 0 : humidity);
+            humidity = (int) page[offset + 43];
+            rec.setExtraHumidity1(humidity == -1 ? 0 : humidity);
+            humidity = (int) page[offset + 44];
+            rec.setExtraHumidity2(humidity == -1 ? 0 : humidity);
 
             offset += 52;
         }
@@ -495,9 +492,7 @@ public abstract class AbstractDavisController extends AbstractController {
     protected CurrentRecord loop() throws IOException {
 
         writeString("LOOP 1\n");
-        if (in.read() != Constants.ACK) {
-            throw new IOException("Invalid response");
-        }
+        assertAck("Invalid response");
         log(IN, "<ACK>");
 
         byte[] buf = readBytes(99);
@@ -507,6 +502,7 @@ public abstract class AbstractDavisController extends AbstractController {
 
         return parseLoopRecord(buf);
     }
+
     protected static final byte FORECAST_ICON_RAIN_BIT = 0x01;
     protected static final byte FORECAST_ICON_CLOUD_BIT = 0x02;
     protected static final byte FORECAST_ICON_PARTLY_CLOUD_BIT = 0x04;
@@ -628,10 +624,10 @@ public abstract class AbstractDavisController extends AbstractController {
     }
 
     protected void log(String prefix, String string) {
-        log.debug(prefix + escape(string));
+        log.trace(prefix + escape(string));
     }
 
     protected void log(String prefix, byte[] bytes, int offset, int length) {
-        log.debug(prefix + escape(bytes, offset, length, false));
+        log.trace(prefix + escape(bytes, offset, length, false));
     }
 }

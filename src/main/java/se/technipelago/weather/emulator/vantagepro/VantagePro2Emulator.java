@@ -170,6 +170,9 @@ public class VantagePro2Emulator implements Emulator {
         if (compareBytes(input, "SETTIME")) {
             return new SetTime();
         }
+        if (compareBytes(input, "SETPER")) {
+            return new SetPeriod(Integer.parseInt(new String(input, 7, input.length - 7)));
+        }
 
         /*
          * Commands that controls the server and emulator.

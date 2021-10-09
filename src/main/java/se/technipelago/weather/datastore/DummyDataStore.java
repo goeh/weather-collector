@@ -18,7 +18,7 @@ public class DummyDataStore implements DataStore {
 
     protected final Logger log = LogManager.getLogger(getClass().getName());
 
-    private Date lastRecordTime = Date.from(Instant.now().minus(1, ChronoUnit.HOURS));
+    private Date lastRecordTime = Date.from(Instant.now().minus(3, ChronoUnit.HOURS).truncatedTo(ChronoUnit.HOURS));
 
     @Override
     public void init(Properties prop) {
@@ -49,6 +49,6 @@ public class DummyDataStore implements DataStore {
 
     @Override
     public void updateCurrent(CurrentRecord current) throws IOException {
-        log.info("Upadate current data " + current);
+        log.info("Update current data " + current);
     }
 }

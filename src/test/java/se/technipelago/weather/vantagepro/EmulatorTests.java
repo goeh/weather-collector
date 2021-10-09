@@ -45,6 +45,12 @@ public class EmulatorTests {
     }
 
     @Test
+    public void testTheEmulator() {
+        Controller ctrl = new EmulatorDownloadController();
+        ctrl.start(new String[]{"--test", "localhost", String.valueOf(server.getPort())});
+    }
+
+    @Test
     public void downloadFromEmulator() {
         Controller ctrl = new EmulatorDownloadController();
         ctrl.start(new String[]{"localhost", String.valueOf(server.getPort())});

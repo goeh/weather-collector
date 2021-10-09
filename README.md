@@ -49,6 +49,13 @@ archive and start the weather collector.
 
     ./gradlew run --args='/dev/ttyUSB0 19200'
 
+If you prefix the command with `--test`, the station will print info to the console and then stop.
+
+    ./gradlew run --args='--test /dev/ttyUSB0 19200'
+
+    The station is a Vantage Pro or Vantage Pro 2
+    Console Time: 2021-10-09T23:02:15.000+0200
+
 ### Run from distribution
 
     cd weather-collector-VERSION
@@ -62,7 +69,7 @@ located in the weather-collector-VERSION/lib folder at runtime.
 
 The first time you run the program with an empty database, it downloads **all** records from the weather station. This
 can take a long time (10 minutes). The next time you run the program, it will only download records created since the
-last download, so that should only take a few seconds.
+last download. That should only take a minute.
 
 To make it easier to start the collector from `cron` or from the command line, create a start script.
 
@@ -94,6 +101,8 @@ program. You can also put `collector.properties` anywhere on the Java classpath.
 
 #### No storage (for testing)
 
+The dummy data store does not store anything. It just prints weather data to the console / stdout.
+
     datastore.type=dummy
     datastore.dummy.class=se.technipelago.weather.datastore.DummyDataStore
 
@@ -105,7 +114,6 @@ store with `datastore.xxx` prefix.
     datastore.type=db,ds1,ds2
 
     datastore.db.class=se.technipelago.weather.datastore.sql.SqlDataStore
-    datastore.db.name=weather
     datastore.db.driver=com.mysql.jdbc.Driver
     datastore.db.url=jdbc:mysql://localhost:3306/weather?user=weather&password=weather
 

@@ -21,7 +21,7 @@ public class TestDataStore implements DataStore {
 
     public static String param;
 
-    private Date lastRecordTime = Date.from(Instant.now().minus(2, ChronoUnit.HOURS));
+    private Date lastRecordTime = Date.from(Instant.now().minus(2, ChronoUnit.HOURS).truncatedTo(ChronoUnit.HOURS));
 
     @Override
     public void init(Properties prop) {

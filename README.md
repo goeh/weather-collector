@@ -60,6 +60,9 @@ If you prefix the command with `--test`, the station will print info to the cons
 
 ### Run from distribution
 
+Unzip the archive located in ./build/distributions/weather-collector-VERSION.zip to a folder on the server that your
+Davis weather station is connected to.
+
     cd weather-collector-VERSION
     ./bin/weather-collector /dev/ttyUSB0 19200
 

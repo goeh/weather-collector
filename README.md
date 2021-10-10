@@ -20,14 +20,14 @@ See https://github.com/goeh/weather-visualizer for how data can be visualized.
 To download and build from source, git must be installed on the Raspberry Pi.
 To install git, use the following command:
 
-    sudo apt-get install git
+    sudo apt install git
 
 ### Java
 
 Java must be installed on the Raspberry Pi prior to building and running the programs.
 To install the default JDK, use the following command:
 
-    sudo apt-get install default-jdk
+    sudo apt install default-jdk
 
 Or to install a specific version:
 
@@ -47,16 +47,9 @@ archive and start the weather collector.
 
 To run the program you must have a configuration file. See section "Sample collector.properties" below.
 
-### Run from source
+For a quick test, create a file called `collector.properties`with this content:
 
-    ./gradlew run --args='/dev/ttyUSB0 19200'
-
-If you prefix the command with `--test`, the station will print info to the console and then stop.
-
-    ./gradlew run --args='--test /dev/ttyUSB0 19200'
-
-    The station is a Vantage Pro or Vantage Pro 2
-    Console Time: 2021-10-09T23:02:15.000+0200
+datastore.type=dummy datastore.dummy.class=se.technipelago.weather.datastore.DummyDataStore
 
 ### Run from distribution
 
@@ -68,28 +61,33 @@ Davis weather station is connected to.
 
 With `VERSION` being equal to the release version e.g. `1.5.0`.
 
-The default database engine is H2 (www.h2database.com) and data is stored in a file called `weather-db.mv.db`. You can
-configure another JDBC database using the `datastore.xxx` properties (see below). A suitable JDBC driver .jar must be
-located in the weather-collector-VERSION/lib folder at runtime.
+### Run from source
+
+    ./gradlew run --args='/dev/ttyUSB0 19200'
+
+If you prefix the command with `--test`, the program will print info to the console and then stop.
+
+    ./gradlew run --args='--test /dev/ttyUSB0 19200'
+
+    The station is a Vantage Pro or Vantage Pro 2
+    Console Time: 2021-10-09T23:02:15.000+0200
+
+### Weather data storage
+
+Weather data downloaded from the weather station is stored by a data storage backend. There are a few data storage
+backend available in core:
+
+* DummyDataStore - Prints data to console / stdout
+* SqlDataStore - Stores data in a SQL / JDBC database
+* RemoteDataStore - POST data to an external HTTP endpoint
+
+The default database engine used by the SqlDataStore is H2 (www.h2database.com) and data is stored in a file
+called `weather-db.mv.db`. You can configure another JDBC database using the `datastore.xxx` properties (see below). A
+suitable JDBC driver .jar must be located in the weather-collector-VERSION/lib folder at runtime.
 
 The first time you run the program with an empty database, it downloads **all** records from the weather station. This
-can take a long time (10 minutes). The next time you run the program, it will only download records created since the
-last download. That should only take a minute.
-
-To make it easier to start the collector from `cron` or from the command line, create a start script.
-
-### Start script for Raspberry Pi (Raspbian)
-
-    #!/bin/bash
-    #
-    WEATHER_HOME=$HOME/weather
-    VERSION=1.5.0       # Example
-    COLLECTOR_HOME=$WEATHER_HOME/weather-collector-$VERSION
-    SERIAL_PORT=/dev/ttyUSB0
-    SERIAL_BAUD=19200
-    
-    cd $COLLECTOR_HOME
-    bin/weather-collector $SERIAL_PORT $SERIAL_BAUD
+can take a long time (10 minutes or more). The next time you run the program, it will only download records created
+since the last download. That should only take a minute.
 
 ### Sample collector.properties
 
@@ -128,6 +126,21 @@ store with `datastore.xxx` prefix.
     datastore.ds2.url=https://api.some.domain/weather/upload
     datastore.ds2.client.key=some-value
     datastore.ds2.client.secret=some-secret-value
+
+To make it easier to start the data collector from `cron` or from the command line, create a start script.
+
+### Start script for Raspberry Pi (Raspbian)
+
+    #!/bin/bash
+    #
+    WEATHER_HOME=$HOME/weather
+    VERSION=1.5.0       # Example
+    COLLECTOR_HOME=$WEATHER_HOME/weather-collector-$VERSION
+    SERIAL_PORT=/dev/ttyUSB0
+    SERIAL_BAUD=19200
+    
+    cd $COLLECTOR_HOME
+    bin/weather-collector $SERIAL_PORT $SERIAL_BAUD
 
 ### Logging
 

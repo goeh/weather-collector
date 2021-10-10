@@ -2,14 +2,14 @@
 
 ## A data collector written in Java that collects data from weather stations.
 
-This project was developed by me when I wanted to collect data from my
-weather station (Davis Vantage Pro2) and I did not want to use a
-Windows server for the job. I have an Ubuntu LAMP server in the closet,
-and it has been running this data collector since 2008,
-collecting weather data every 10 minutes without interruption.
+This project was developed by me when I wanted to collect data from my weather station (Davis Vantage Pro2) and I did
+not want to use a Windows server for the job. I have an Ubuntu LAMP server in the closet, and it has been running this
+data collector since 2008, collecting weather data every 10 minutes without interruption.
 
-Since 2017 a Raspberry Pi 3 has taken over the task of downloading weather data at my home.
-No changes to the program needed.
+Since 2017 a Raspberry Pi 3 has taken over the task of downloading weather data at my home. No changes to the program
+needed.
+
+I've also successfully tested the system on a Raspberry Pi 4 with Raspberry Pi OS Lite (Release date: May 7th 2021).
 
 See https://github.com/goeh/weather-visualizer for how data can be visualized.
 
@@ -17,8 +17,7 @@ See https://github.com/goeh/weather-visualizer for how data can be visualized.
 
 ### git
 
-To download and build from source, git must be installed on the Raspberry Pi.
-To install git, use the following command:
+To download and build from source, git must be installed on the Raspberry Pi. To install git, use the following command:
 
     sudo apt install git
 

@@ -168,7 +168,7 @@ public abstract class AbstractDavisController extends AbstractController {
             return;
         }
 
-        log.debug("Connected to weather station");
+        log.info("Connected to weather station");
 
         // Test command.
         writeString("TEST\n");
@@ -185,7 +185,7 @@ public abstract class AbstractDavisController extends AbstractController {
         if (stationType == null) {
             throw new IOException("Unsupported station type: " + String.valueOf((int) buf[1]));
         }
-        log.debug("The station is a {}", stationType);
+        log.info("The station is a {}", stationType);
 
         // Firmware version.
         writeString("VER\n");
@@ -204,7 +204,7 @@ public abstract class AbstractDavisController extends AbstractController {
 
         // Get station time.
         Date consoleTime = VantageUtil.getTime(buf, 0);
-        log.debug("Console Time: {}", consoleTime);
+        log.info("Console Time: {}", consoleTime);
     }
 
     public void configure() throws IOException {
@@ -213,7 +213,7 @@ public abstract class AbstractDavisController extends AbstractController {
             return;
         }
 
-        log.debug("Connected to weather station");
+        log.info("Connected to weather station");
         setConsoleTime(new Date());
         writeString("SETPER 10\n");
         assertAck("Invalid response");

@@ -101,6 +101,33 @@ program. You can also put `collector.properties` anywhere on the Java classpath.
     datastore.jdbc.driver=com.mysql.cj.jdbc.Driver
     datastore.jdbc.url=jdbc:mysql://localhost:3306/weather?user=weather&password=weather
 
+Install MySQL/MariaDB on you Raspberry Pi.
+
+    sudo apt install mariadb-server
+
+Set root password and secure your MariaDB installation
+(it's a good idea to answer Y (yes) to all questions).
+
+    sudo mysql_secure_installation
+
+Create a `weather` database.
+
+    sudo bash
+    mysql -u root -p
+    (enter root password you assigned above)
+    
+    (at SQL prompt)
+    MariaDB [(none)]> CREATE USER weather IDENTIFIED BY 'weather';
+    MariaDB [(none)]> CREATE DATABASE weather;
+    MariaDB [(none)]> GRANT ALL ON weather.* TO weather;
+    MariaDB [(none)]> exit
+
+    exit # to leave 'root' user and go back to 'pi'
+
+To verify that weather records are stored in the database after you run the download command.
+
+    mysql -u weather -p weather -e 'SELECT ts, temp_in, hum_in, barometer FROM archive ORDER BY ts'
+
 #### No storage (for testing)
 
 The dummy data store does not store anything. It just prints weather data to the console / stdout.

@@ -35,7 +35,10 @@ dependencies {
     runtimeOnly 'mysql:mysql-connector-java:8.0.25'
     runtimeOnly 'com.h2database:h2:1.4.200'
     implementation 'org.apache.pulsar:pulsar-client:2.8.0'
+<<<<<<< HEAD
 >>>>>>> progress fixing issue with streaming
+=======
+>>>>>>> 878ee0791ee3c8a5ced81e4707e59defe91a5f1c
     implementation 'org.apache.logging.log4j:log4j-core:2.14.1'
     implementation 'org.slf4j:slf4j-simple:1.7.32'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.5'

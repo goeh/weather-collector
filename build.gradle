@@ -28,17 +28,6 @@ repositories {
 dependencies {
     implementation 'io.github.java-native:jssc:2.9.4'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
-<<<<<<< HEAD
-=======
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
-    runtimeOnly 'mysql:mysql-connector-java:8.0.25'
-    runtimeOnly 'com.h2database:h2:1.4.200'
-    implementation 'org.apache.pulsar:pulsar-client:2.8.0'
-<<<<<<< HEAD
->>>>>>> progress fixing issue with streaming
-=======
->>>>>>> 878ee0791ee3c8a5ced81e4707e59defe91a5f1c
     implementation 'org.apache.logging.log4j:log4j-core:2.14.1'
     implementation 'org.slf4j:slf4j-simple:1.7.32'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.5'

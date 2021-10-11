@@ -25,7 +25,6 @@ public class PulsarDataStore implements DataStore {
     private Producer<DavisMessage> producer;
     private PreparedStatement selectStatus;
     private PreparedStatement updateStatus;
-    private PreparedStatement updateCurrent;
 
 
     private static final String PROPERTIES_FILE = "collector.properties";
@@ -105,14 +104,6 @@ public class PulsarDataStore implements DataStore {
                 log.warn("Exception while closing SELECT statement");
             }
             selectStatus = null;
-        }
-        if (updateCurrent != null) {
-            try {
-                updateCurrent.close();
-            } catch (SQLException ex) {
-                log.warn("Exception while closing UPDATE statement");
-            }
-            updateCurrent = null;
         }
         if (conn != null) {
             try {

@@ -45,11 +45,10 @@ public class PulsarDataStore implements DataStore {
 
     @Override
     public void init(Properties prop) {
-        // TODO use properties provided here instead of our own property file?
         if (conn == null) {
             try {
                 conn = DriverManager.getConnection("jdbc:h2:file:./statusDb");
-                createTables(); // TODO this is called every time.
+                createTables();
             } catch (SQLException e) {
                 log.error("Cannot connect to database", e);
                 throw new RuntimeException(e);

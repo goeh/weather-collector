@@ -36,8 +36,9 @@ public class PulsarDataStore implements DataStore {
     final String service_url = prop.getProperty("pulsar.service_url");
     final String topic = prop.getProperty("pulsar.topic");
     final String token = prop.getProperty("pulsar.token");
-    final String uuid = prop.getProperty("sensor.uuid");
 
+    final String uuid = prop.getProperty("sensor.uuid");
+    final String sensor_name = prop.getProperty("sensor.name");
     final float lon = Float.parseFloat((prop.getProperty("sensor.longitude")));
     final float lat = Float.parseFloat((prop.getProperty("sensor.latitude")));
     final float alt = Float.parseFloat((prop.getProperty("sensor.altitude")));
@@ -77,7 +78,7 @@ public class PulsarDataStore implements DataStore {
         if (producer == null) {
             try {
                 producer = client.newProducer(Schema.AVRO(DavisMessage.class))
-                        .producerName(uuid)
+                        .producerName(sensor_name)
                         .topic(topic)
                         .sendTimeout(10, TimeUnit.SECONDS)
                         .create();
@@ -159,7 +160,8 @@ public class PulsarDataStore implements DataStore {
                 .format(timestamp);
 
         producer.newMessage().value(DavisMessage.builder()
-                .sensor(uuid)
+                .sensor_id(uuid)
+                .sensor_name(sensor_name)
                 .latitude(lat)
                 .longitude(lon)
                 .altitude(alt)

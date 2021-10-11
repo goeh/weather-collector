@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DavisMessage {
-    String sensor;
+    String sensor_id;
+    String sensor_name;
     float latitude;
     float longitude;
     float altitude;

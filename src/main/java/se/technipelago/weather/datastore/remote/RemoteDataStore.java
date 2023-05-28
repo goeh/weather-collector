@@ -146,15 +146,33 @@ public class RemoteDataStore implements DataStore {
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"extra1Temperature\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "extra1Temperature\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getExtraTemperature1() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"extra1Humidity\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "extra2Temperature\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getExtraTemperature2() + "\n");
+        buf.append("    },\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "extra3Temperature\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getExtraTemperature3() + "\n");
+        buf.append("    },\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "extra1Humidity\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getExtraHumidity1() + "\n");
+        buf.append("    },\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "extra2Humidity\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getExtraHumidity2() + "\n");
         buf.append("    }\n");
 
         buf.append("  ]\n");

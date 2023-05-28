@@ -227,8 +227,14 @@ public class RemoteDataStore implements DataStore {
         buf.append("      \"sid\": \"" + getPrefix() + "icons\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getForcastIconMask() + "\n");
-        buf.append("    }\n");
-/*
+        buf.append("    },\n");
+
+        buf.append("    {\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "batteryStatus\",\n");
+        buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
+        buf.append("      \"value\": " + rec.getTransmitterBatteryStatus() + "\n");
+        buf.append("    },\n");
+
         buf.append("    {\n");
         buf.append("      \"sid\": \"" + getPrefix() + "sunrise\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
@@ -240,7 +246,7 @@ public class RemoteDataStore implements DataStore {
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getSunset().getTime() + "\n");
         buf.append("    }\n");
-*/
+
         buf.append("  ]\n");
         buf.append("}\n");
 

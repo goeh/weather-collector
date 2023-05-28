@@ -2,13 +2,12 @@ plugins {
     id 'java'
     id 'idea'
     id 'application'
-    id 'net.ltgt.apt' version '0.15'
 }
 
 group 'se.technipelago'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 version = '1.5.0-SNAPSHOT'
 mainClassName = "se.technipelago.weather.Downloader"
 
@@ -22,7 +21,6 @@ jar {
 
 repositories {
     mavenCentral()
-    maven { url 'https://projectlombok.org/edge-releases' }
 }
 
 dependencies {
@@ -37,17 +35,8 @@ dependencies {
     runtimeOnly 'mysql:mysql-connector-java:8.0.25'
     runtimeOnly 'com.h2database:h2:1.4.200'
 
-    compileOnly 'org.projectlombok:lombok:edge-SNAPSHOT'
-    apt 'org.projectlombok:lombok:edge-SNAPSHOT'
-    compileOnly 'org.projectlombok:lombok:1.18.20'
-    annotationProcessor 'org.projectlombok:lombok:1.18:6'
-
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
-}
-
-tasks.withType(JavaCompile) {
-    options.annotationProcessorPath = configurations.apt
 }
 
 test {

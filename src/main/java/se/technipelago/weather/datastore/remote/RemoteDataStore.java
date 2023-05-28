@@ -18,10 +18,7 @@ import se.technipelago.weather.datastore.DataStore;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Created by goran on 15-06-13.
@@ -38,12 +35,15 @@ public class RemoteDataStore implements DataStore {
 
     private String name;
 
-    public RemoteDataStore(String name) {
-        this.name = name;
+    private String getPrefix() {
+        return name != null ? name + "_" : "";
     }
 
     @Override
     public void init(Properties prop) {
+        name = Optional.ofNullable(prop.getProperty("name"))
+                .map(s -> StringUtils.isBlank(s) ? null : s.trim())
+                .orElse(null);
         url = prop.getProperty("url");
         if (StringUtils.isEmpty(url)) {
             log.error("Property 'url' must be set");
@@ -92,55 +92,55 @@ public class RemoteDataStore implements DataStore {
         buf.append("  \"data\": [\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "outsideTemperature\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "outsideTemperature\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getOutsideTemperature() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "outsideHumidity\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "outsideHumidity\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getOutsideHumidity() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "windSpeed\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "windSpeed\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getWindSpeedAvg() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "windGusts\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "windGusts\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getWindSpeedHigh() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "windDirection\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "windDirection\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getWindDirection() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "barometer\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "barometer\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getBarometer() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "rain\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "rain\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getRainFall() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "sun\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "sun\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getSolarRadiation() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "uv\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "uv\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getUvIndex() + "\n");
         buf.append("    }\n");
@@ -188,25 +188,25 @@ public class RemoteDataStore implements DataStore {
         buf.append("  \"data\": [\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "barometerTrend\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "barometerTrend\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getBarometerTrend() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "icons\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "icons\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getForcastIconMask() + "\n");
         buf.append("    }\n");
 /*
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "sunrise\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "sunrise\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getSunrise().getTime() + "\n");
         buf.append("    },\n");
 
         buf.append("    {\n");
-        buf.append("      \"sid\": \"" + name + "sunset\",\n");
+        buf.append("      \"sid\": \"" + getPrefix() + "sunset\",\n");
         buf.append("      \"timestamp\": \"" + timestamp + "\",\n");
         buf.append("      \"value\": " + rec.getSunset().getTime() + "\n");
         buf.append("    }\n");
